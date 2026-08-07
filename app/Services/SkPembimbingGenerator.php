@@ -171,12 +171,24 @@ class SkPembimbingGenerator
 
     protected function qrDataUri(string $data): string
     {
-        return Builder::create()
-            ->writer(new PngWriter())
-            ->data($data)
-            ->size(180)
-            ->margin(2)
-            ->build()
-            ->getDataUri();
+        // v5: Builder::create(); v6+: constructor (create() dihapus).
+        if (method_exists(Builder::class, 'create')) {
+            return Builder::create()
+                ->writer(new PngWriter())
+                ->data($data)
+                ->size(180)
+                ->margin(2)
+                ->build()
+                ->getDataUri();
+        }
+
+        $builder = new Builder(
+            writer: new PngWriter(),
+            data: $data,
+            size: 180,
+            margin: 2,
+        );
+
+        return $builder->build()->getDataUri();
     }
 }
