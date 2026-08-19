@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Concerns\HasPermohonanWorkflow;
+use App\Concerns\SyncsAiTrainingData;
 use App\Enums\StatusPermohonan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PermohonanPembimbing extends Model
 {
     use HasFactory;
+    use HasPermohonanWorkflow;
+    use SyncsAiTrainingData;
 
     protected $table = 'permohonan_pembimbing';
 
@@ -18,7 +23,9 @@ class PermohonanPembimbing extends Model
         'judul_skripsi',
         'semester',
         'pembimbing_1',
+        'pembimbing_1_dosen_id',
         'pembimbing_2',
+        'pembimbing_2_dosen_id',
         'file_usul_pembimbing',
         'status',
         'akademik_verified_by',
@@ -59,71 +66,30 @@ class PermohonanPembimbing extends Model
         return $this->belongsTo(Mahasiswa::class, 'mahasiswa_nim', 'nim');
     }
 
-    public function akademikVerifier(): BelongsTo
+    public function permohonanPenguji(): HasMany
     {
-        return $this->belongsTo(User::class, 'akademik_verified_by');
+        return $this->hasMany(PermohonanPenguji::class, 'permohonan_pembimbing_id');
     }
 
-    public function kabagVerifier(): BelongsTo
+    public function pembimbing1Dosen(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'kabag_verified_by');
+        return $this->belongsTo(Dosen::class, 'pembimbing_1_dosen_id');
     }
 
-    public function wadek1Verifier(): BelongsTo
+    public function pembimbing2Dosen(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'wadek1_verified_by');
+        return $this->belongsTo(Dosen::class, 'pembimbing_2_dosen_id');
     }
 
-    public function dekanVerifier(): BelongsTo
+    /**
+     * @return array<string, string>
+     */
+    protected function dosenNamaToIdMap(): array
     {
-        return $this->belongsTo(User::class, 'dekan_verified_by');
-    }
-
-    public function isEditableByAkademik(): bool
-    {
-        return in_array($this->status, [
-            StatusPermohonan::Diajukan,
-            StatusPermohonan::DikembalikanAkademik,
-        ], true);
-    }
-
-    public function canBeSentByAkademik(): bool
-    {
-        return in_array($this->status, [
-            StatusPermohonan::Diajukan,
-            StatusPermohonan::DikembalikanAkademik,
-        ], true);
-    }
-
-    public function canBeRejectedByAkademik(): bool
-    {
-        return in_array($this->status, [
-            StatusPermohonan::Diajukan,
-            StatusPermohonan::DikembalikanAkademik,
-        ], true);
-    }
-
-    public function isAwaitingPimpinan(): bool
-    {
-        return $this->status === StatusPermohonan::DikirimPimpinan;
-    }
-
-    public function kabagSudahVerifikasi(): bool
-    {
-        return $this->kabag_status === 'disetujui';
-    }
-
-    public function wadek1SudahVerifikasi(): bool
-    {
-        return $this->wadek1_status === 'disetujui';
-    }
-
-    public function canDekanVerify(): bool
-    {
-        return $this->isAwaitingPimpinan()
-            && $this->kabagSudahVerifikasi()
-            && $this->wadek1SudahVerifikasi()
-            && $this->dekan_status === 'pending';
+        return [
+            'pembimbing_1' => 'pembimbing_1_dosen_id',
+            'pembimbing_2' => 'pembimbing_2_dosen_id',
+        ];
     }
 
     public function getFileUsulUrlAttribute(): ?string
@@ -133,14 +99,5 @@ class PermohonanPembimbing extends Model
         }
 
         return '/storage/'.$this->file_usul_pembimbing;
-    }
-
-    public function formatRoleStatus(?string $status): string
-    {
-        return match ($status) {
-            'disetujui' => 'Disetujui',
-            'ditolak' => 'Ditolak / Dikembalikan',
-            default => 'Menunggu',
-        };
     }
 }

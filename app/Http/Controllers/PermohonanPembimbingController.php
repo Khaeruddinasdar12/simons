@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ProgramStudi;
 use App\Enums\StatusPermohonan;
 use App\Http\Requests\StorePermohonanPembimbingRequest;
+use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PermohonanPembimbing;
 use App\Services\SkPembimbingGenerator;
@@ -21,6 +22,7 @@ class PermohonanPembimbingController extends Controller
     {
         return view('permohonan.create', [
             'programStudi' => ProgramStudi::options(),
+            'dosens' => Dosen::optionsForSelect(),
         ]);
     }
 
@@ -66,7 +68,9 @@ class PermohonanPembimbingController extends Controller
                     'permohonanPembimbing' => fn ($q) => $q
                         ->with(['akademikVerifier', 'kabagVerifier', 'wadek1Verifier', 'dekanVerifier'])
                         ->latest(),
-                    'permohonanPenguji' => fn ($q) => $q->latest(),
+                    'permohonanPenguji' => fn ($q) => $q
+                        ->with(['akademikVerifier', 'kabagVerifier', 'wadek1Verifier', 'dekanVerifier', 'permohonanPembimbing'])
+                        ->latest(),
                     'undanganMunaqasyah' => fn ($q) => $q->latest(),
                     'pembimbingTerbitTerakhir',
                 ])

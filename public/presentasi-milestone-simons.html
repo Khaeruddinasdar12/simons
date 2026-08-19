@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Presentasi Milestone — SIMONS · FSHI IAIN Bone</title>
+    <link rel="icon" href="logoiainbone.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=fraunces:550,650,700|manrope:400,500,600,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0f241c;
+            --forest: #14532d;
+            --leaf: #166534;
+            --mist: #ecfdf3;
+            --paper: #f4fbf6;
+            --line: rgba(20, 83, 45, 0.14);
+            --muted: rgba(15, 36, 28, 0.68);
+            --white: #fff;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; height: 100%; }
+        body {
+            font-family: Manrope, sans-serif;
+            color: var(--ink);
+            background: #0b1f16;
+        }
+        .deck {
+            height: 100%;
+            display: grid;
+            grid-template-rows: 1fr auto;
+        }
+        .viewport {
+            position: relative;
+            overflow: hidden;
+        }
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: none;
+            padding: clamp(1.5rem, 4vh, 2.75rem) clamp(1.75rem, 5vw, 4.5rem) 4.5rem;
+            background:
+                radial-gradient(circle at 8% 0%, rgba(34, 197, 94, 0.14), transparent 34%),
+                linear-gradient(165deg, #f7fdf8 0%, var(--paper) 48%, #eef7f1 100%);
+            overflow: auto;
+        }
+        .slide.is-on { display: block; }
+        .slide.cover {
+            background:
+                linear-gradient(135deg, rgba(11, 40, 24, 0.94), rgba(20, 83, 45, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40z'/%3E%3C/g%3E%3C/svg%3E");
+            color: var(--white);
+        }
+        .slide.cover .kicker,
+        .slide.cover .muted { color: rgba(255,255,255,.78); }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+        .logos { display: flex; align-items: center; gap: .75rem; }
+        .logos img { height: 2.6rem; width: auto; object-fit: contain; }
+        .brand { min-width: 0; }
+        .brand strong { display: block; font-size: .92rem; letter-spacing: .04em; }
+        .brand span { display: block; font-size: .68rem; opacity: .72; }
+        .kicker {
+            margin: 0 0 .45rem;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--leaf);
+        }
+        h1, h2, h3 { font-family: Fraunces, Georgia, serif; margin: 0; letter-spacing: .01em; }
+        h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1.08; }
+        h2 { font-size: clamp(1.55rem, 3.4vw, 2.35rem); color: var(--forest); line-height: 1.2; }
+        .slide.cover h2 { color: var(--white); }
+        .lead { margin: .85rem 0 0; max-width: 42rem; font-size: 1.05rem; line-height: 1.6; }
+        .muted { color: var(--muted); }
+        .grid { display: grid; gap: .85rem; margin-top: 1.15rem; }
+        .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .card {
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            padding: 1rem 1.1rem;
+        }
+        .slide.cover .card {
+            background: rgba(255,255,255,.08);
+            border-color: rgba(255,255,255,.16);
+        }
+        .card h3 { font-size: 1.05rem; color: var(--forest); margin-bottom: .35rem; }
+        .slide.cover .card h3 { color: #dcfce7; }
+        .card p, .card li { margin: 0; font-size: .92rem; line-height: 1.5; color: var(--muted); }
+        .slide.cover .card p { color: rgba(255,255,255,.86); }
+        ul.clean { margin: .7rem 0 0; padding: 0 0 0 1.1rem; }
+        ul.clean li { margin: .35rem 0; line-height: 1.5; }
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+        .chip {
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: .45rem .85rem;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--forest);
+        }
+        .chip.arrow { border: 0; background: transparent; color: var(--leaf); padding: 0 .1rem; }
+        .banner {
+            margin-top: 1.15rem;
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            font-family: Fraunces, Georgia, serif;
+            font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+            line-height: 1.35;
+        }
+        .slide.cover .banner {
+            background: rgba(74, 222, 128, 0.16);
+            border: 1px solid rgba(74, 222, 128, 0.45);
+            color: #ecfdf3;
+        }
+        .notice-pill {
+            display: inline-block;
+            background: #fbbf24;
+            color: #1c1917;
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: .35rem .85rem;
+            margin-bottom: .55rem;
+        }
+        .need-stamp {
+            display: inline-block;
+            background: #b91c1c;
+            color: #fff;
+            font-size: .8rem;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            border-radius: .45rem;
+            padding: .4rem .75rem;
+        }
+        .prinsip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+            margin-top: .85rem;
+        }
+        .prinsip span {
+            background: #dcfce7;
+            color: #14532d;
+            border-radius: 999px;
+            padding: .32rem .7rem;
+            font-size: .78rem;
+            font-weight: 700;
+        }
+        table.simple td:first-child { font-weight: 700; color: var(--forest); min-width: 9.5rem; }
+        .status { display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: .22rem .55rem; }
+        .done { background: #dcfce7; color: #166534; }
+        .now { background: #fef3c7; color: #92400e; }
+        .next { background: #e0e7ff; color: #3730a3; }
+        table.simple { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: .9rem; }
+        table.simple th, table.simple td { text-align: left; padding: .65rem .7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+        table.simple th { color: var(--forest); font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; }
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .7rem 1.25rem;
+            background: #082016;
+            color: #d7efe1;
+            font-size: .82rem;
+        }
+        .nav-btns { display: flex; gap: .45rem; }
+        .nav-btns button, .hint-key {
+            border: 1px solid rgba(255,255,255,.16);
+            background: rgba(255,255,255,.06);
+            color: #fff;
+            border-radius: .55rem;
+            padding: .4rem .7rem;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .progress { flex: 1; height: 4px; background: rgba(255,255,255,.12); border-radius: 99px; overflow: hidden; max-width: 18rem; }
+        .progress > span { display: block; height: 100%; background: #4ade80; width: 0; }
+        .bagan {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .28rem;
+            margin-top: 1rem;
+        }
+        .node {
+            background: var(--white);
+            border: 1.5px solid var(--line);
+            border-radius: .8rem;
+            padding: .5rem .9rem;
+            text-align: center;
+            min-width: 10.5rem;
+            max-width: 22rem;
+        }
+        .node b { display: block; color: var(--forest); font-size: .88rem; }
+        .node small { display: block; margin-top: .15rem; color: var(--muted); font-size: .72rem; font-weight: 500; line-height: 1.35; }
+        .node.gate { background: var(--mist); }
+        .node.ok { background: #f0fdf4; border-color: #86efac; }
+        .node.stop { background: #fef2f2; border-color: #fecaca; }
+        .node.wide { min-width: 16rem; }
+        .v { color: var(--leaf); font-weight: 800; font-size: 1rem; line-height: 1; }
+        .v span { display: block; font-size: .68rem; font-weight: 700; color: var(--muted); }
+        .split {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: .55rem;
+            align-items: stretch;
+            width: min(34rem, 100%);
+        }
+        .split .col { display: flex; flex-direction: column; align-items: center; gap: .28rem; }
+        .split .mid {
+            display: flex;
+            align-items: center;
+            color: var(--leaf);
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .lane {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .65rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .lane .node { min-width: 0; width: 100%; }
+        @media (max-width: 860px) {
+            .cols-2, .cols-3, .cols-4, .lane { grid-template-columns: 1fr; }
+            .logos img { height: 2.1rem; }
+        }
+        @media print {
+            body { background: #fff; }
+            .bar { display: none; }
+            .slide { position: relative; display: block !important; page-break-after: always; min-height: 100vh; overflow: visible; }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck">
+        <div class="viewport" id="viewport"></div>
+        <div class="bar">
+            <span id="counter">1 / 1</span>
+            <div class="progress"><span id="fill"></span></div>
+            <div class="nav-btns">
+                <button type="button" id="prev" aria-label="Sebelumnya">←</button>
+                <button type="button" id="next" aria-label="Berikutnya">→</button>
+            </div>
+            <span>← → atau spasi · F untuk layar penuh</span>
+        </div>
+    </div>
+
+    <template id="slides">
+        <section class="slide cover">
+            <div class="topbar">
+                <div class="logos">
+                    <img src="logokemenag.png" alt="Logo Kementerian Agama">
+                    <img src="logoiainbone.png" alt="Logo IAIN Bone">
+                    <div class="brand">
+                        <strong>Fakultas Syariah dan Hukum Islam</strong>
+                        <span>Institut Agama Islam Negeri Bone</span>
+                    </div>
+                </div>
+            </div>
+            <p class="kicker">Presentasi milestone proyek</p>
+            <h1>SIMONS</h1>
+            <p class="lead">Sistem Manajemen Operasional Non Srikandi — digitalisasi alur SK skripsi dari usulan mahasiswa hingga penerbitan surat keputusan Dekan.</p>
+            <p class="lead" style="max-width:44rem;font-weight:700;">Karya ini adalah bukti layanan digital FSHI yang mendukung SPBE IAIN Bone.</p>
+            <div class="grid cols-3" style="margin-top:2rem;">
+                <div class="card"><h3>SK Pembimbing</h3><p>Sudah beroperasi: form, verifikasi, PDF, email, tracking.</p></div>
+                <div class="card"><h3>SK Penguji</h3><p>Sudah beroperasi: gerbang NIM, usulan Kaprodi, alur sama.</p></div>
+                <div class="card"><h3>Munaqasyah &amp; AI</h3><p>Fondasi data siap; undangan dan model AI belum dibangun.</p></div>
+            </div>
+        </section>
+
+        <section class="slide cover">
+            <div class="topbar">
+                <div class="logos">
+                    <img src="logokemenag.png" alt="Logo Kementerian Agama">
+                    <img src="logoiainbone.png" alt="Logo IAIN Bone">
+                    <div class="brand">
+                        <strong>Untuk Rektor, Wakil Rektor, dan Dekan</strong>
+                        <span>Baca halaman ini sebelum milestone teknis</span>
+                    </div>
+                </div>
+                <span class="notice-pill">Pesan utama</span>
+            </div>
+            <p class="kicker">Halaman 2 · dukungan SPBE</p>
+            <h1>Karya ini sangat mendukung SPBE</h1>
+            <div class="banner">
+                SIMONS adalah bukti layanan digital FSHI yang sudah bertransaksi: mahasiswa mengajukan daring, pimpinan memverifikasi sesuai wewenang, SK terbit ber-QR dan bisa diaudit. Ini kontribusi konkret IAIN Bone pada Sistem Pemerintahan Berbasis Elektronik.
+            </div>
+            <p class="lead">Perpres Nomor 95 Tahun 2018 mewajibkan instansi memakai TIK untuk memberi layanan — bukan hanya memiliki komputer. Tanpa karya seperti ini, pimpinan sulit menunjukkan bukti saat asesmen indeks SPBE.</p>
+            <div class="grid cols-3" style="margin-top:1.6rem;">
+                <div class="card">
+                    <h3>Wajib, bukan tren IT</h3>
+                    <p>SPBE adalah mandat Presiden. IAIN Bone sebagai PTKIN/satker Kemenag dinilai kematangan layanannya, termasuk layanan mahasiswa di fakultas.</p>
+                </div>
+                <div class="card">
+                    <h3>Pimpinan yang dimintai bukti</h3>
+                    <p>Asesor tidak menerima janji. Mereka minta aplikasi yang jalan, proses yang terdokumentasi, dan jejak siapa memutuskan kapan.</p>
+                </div>
+                <div class="card">
+                    <h3>Sudah tingkat transaksi</h3>
+                    <p>Form → verifikasi berjenjang → PDF + QR + email. Itu kematangan layanan tingkat 3, bukan sekadar pengumuman di website.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Aturan resmi pemerintah</p>
+            <h2>Dasar hukum SPBE yang mengikat pimpinan</h2>
+            <p class="lead muted">Ini peraturan yang berlaku, bukan opini pengembang. IAIN Bone sebagai PTKIN/satker Kementerian Agama dinilai dalam kerangka SPBE; Rektor memimpin satker, Dekan memimpin unit layanan yang buktinya masuk asesmen.</p>
+            <p class="muted" style="margin:.7rem 0 0;font-size:.82rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--leaf);">Pasal 2 Perpres 95/2018 · tujuh prinsip SPBE</p>
+            <div class="prinsip">
+                <span>Efektivitas</span>
+                <span>Keterpaduan</span>
+                <span>Kesinambungan</span>
+                <span>Efisiensi</span>
+                <span>Akuntabilitas</span>
+                <span>Interoperabilitas</span>
+                <span>Keamanan</span>
+            </div>
+            <table class="simple">
+                <thead>
+                    <tr><th>Aturan</th><th>Isi resmi yang relevan</th><th>Implikasi di IAIN Bone</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Perpres 95/2018<br><small style="font-weight:500;color:var(--muted);">SPBE</small></td>
+                        <td>SPBE adalah penyelenggaraan pemerintahan memakai TIK untuk layanan kepada pengguna. Pasal 42–44 membedakan layanan administrasi dan layanan publik; pendidikan termasuk layanan publik. Pasal 60: setiap pimpinan Instansi Pusat mengoordinasikan dan menetapkan kebijakan SPBE, serta menunjuk koordinator. Pasal 70–71: pemantauan dan evaluasi berkala; pedoman oleh Menteri PANRB.</td>
+                        <td>SK skripsi mahasiswa adalah layanan publik pendidikan. Wajib digital, teraudit, dan berkelanjutan — bukan urusan fakultas yang boleh diabaikan kampus.</td>
+                    </tr>
+                    <tr>
+                        <td>Perpres 132/2022<br><small style="font-weight:500;color:var(--muted);">Arsitektur SPBE Nasional</small></td>
+                        <td>Instansi menata arsitektur: kebijakan, tata kelola, manajemen, layanan, infrastruktur, aplikasi, dan keamanan informasi.</td>
+                        <td>SIMONS harus masuk peta aplikasi/layanan kampus, bukan aplikasi yang hanya hidup di laptop pengembang.</td>
+                    </tr>
+                    <tr>
+                        <td>Perpres 82/2023<br><small style="font-weight:500;color:var(--muted);">Percepatan transformasi digital</small></td>
+                        <td>Mendorong keterpaduan layanan digital. Instansi tidak boleh tertinggal sebagai silo kertas sementara layanan nasional sudah elektronik.</td>
+                        <td>Fakultas yang masih mengandalkan loket SK kalah bukti dibanding unit yang sudah bertransaksi elektronik.</td>
+                    </tr>
+                    <tr>
+                        <td>PermenPANRB 59/2020<br><small style="font-weight:500;color:var(--muted);">Pemantauan &amp; evaluasi SPBE</small></td>
+                        <td>Mengukur tingkat kematangan; hasilnya indeks SPBE. Dapat dijadikan IKU reformasi birokrasi. Pimpinan menunjuk responden. Asesor menilai bukti, bukan niat. Domain: Kebijakan, Tata Kelola, Manajemen, Layanan. Kematangan layanan: 1 informasi → 2 interaksi → 3 transaksi → 4 kolaborasi → 5 optimum.</td>
+                        <td>Website pengumuman = tingkat 1. Form tanpa alur pejabat = tingkat 2. SIMONS (ajuan + putusan + dokumen sah) mengarah ke tingkat 3 Transaksi.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Untuk pimpinan</p>
+            <h2>Seberapa butuh pimpinan pada inovasi SPBE ini</h2>
+            <p class="lead muted" style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;max-width:none;">
+                <span class="need-stamp">Kebutuhan: tinggi</span>
+                <span>Bukan karena tren IT, melainkan karena penilaian jabatan, indeks SPBE, dan bukti layanan kepada mahasiswa.</span>
+            </p>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>1. Pimpinan yang dinilai, bukan staf IT</h3>
+                    <p>Pasal 60 Perpres 95/2018 menugaskan pimpinan instansi mengoordinasikan SPBE. Di kampus, Rektor adalah pimpinan satker; Dekan adalah pimpinan unit yang layanannya masuk bukti. Indeks SPBE dan asesmen asesor meminta nama pejabat, bukan hanya nama programmer.</p>
+                </div>
+                <div class="card">
+                    <h3>2. Tanpa bukti, nilai layanan macet</h3>
+                    <p>Permen PANRB 59/2020: asesor memverifikasi dokumen dan sistem. SOP Word, foto loket, atau “rencana tahun depan” tidak menaikkan kematangan. SIMONS menyediakan bukti hidup: status, log Kabag/Wadek 1/Dekan, PDF, QR, tracking NIM.</p>
+                </div>
+                <div class="card">
+                    <h3>3. Indeks SPBE terkait kinerja dan RB</h3>
+                    <p>Target indeks SPBE dijadikan IKU dalam kerangka reformasi birokrasi. Pimpinan yang tidak punya inovasi layanan digital membawa risiko predikat “informasi/reaktif”: tata kelola ada di kertas, layanan belum bertransaksi.</p>
+                </div>
+                <div class="card">
+                    <h3>4. Akuntabilitas keputusan SK</h3>
+                    <p>Prinsip akuntabilitas dan keamanan (Pasal 2) menuntut kejelasan siapa memutuskan dan keaslian dokumen. SIMONS menolak loncat wewenang dan menerbitkan SK ber-QR. Itu melindungi pimpinan saat ada sanggahan atau pemeriksaan.</p>
+                </div>
+            </div>
+            <div class="card" style="margin-top:1rem;border-color:#166534;">
+                <h3>Apa yang dibutuhkan dari pimpinan sekarang</h3>
+                <p>Tetapkan SIMONS sebagai layanan resmi FSHI, dukung rilis di server kampus (bukan hanya localhost), jaga SMTP dan HTTPS, dan pakai jejak sistem saat rapat dan asesmen SPBE. Inovasi ini sudah ada — yang menentukan dampaknya ke indeks kampus adalah pengakuan dan pemakaian pimpinan.</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Agenda</p>
+            <h2>Isi presentasi</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>1 — SPBE (sudah di awal)</h3>
+                    <p>Mandat hukum, kebutuhan pimpinan, dan posisi SIMONS sebagai bukti layanan digital IAIN Bone.</p>
+                </div>
+                <div class="card">
+                    <h3>2 — Konteks</h3>
+                    <p>Latar belakang, masalah operasional, tujuan, dan ruang lingkup FSHI IAIN Bone.</p>
+                </div>
+                <div class="card">
+                    <h3>3 — Milestone &amp; alur</h3>
+                    <p>Tahapan proyek dan bagan alur aplikasi dari form mahasiswa sampai SK terbit.</p>
+                </div>
+                <div class="card">
+                    <h3>4 — Fungsi, manfaat &amp; durasi</h3>
+                    <p>Peran pengguna, dampak operasional, requirement development, dan waktu prakom.</p>
+                </div>
+                <div class="card">
+                    <h3>5 — Aturan tertanam &amp; inovasi</h3>
+                    <p>SOP yang sistem tolak jika dilanggar, inovasi gerbang NIM/QR, dan peta domain SPBE.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Latar belakang</p>
+            <h2>Mengapa SIMONS diperlukan</h2>
+            <p class="lead muted">Penetapan pembimbing dan penguji skripsi di FSHI adalah proses resmi berantai. Sebelum digitalisasi, titik lemahnya bukan pada wewenang pejabat, melainkan pada jejak, keseragaman, dan kecepatan administrasi.</p>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Masalah di lapangan</h3>
+                    <ul class="clean">
+                        <li>Mahasiswa sulit mengetahui status usulan setelah berkas masuk.</li>
+                        <li>Usulan Kaprodi (PDF/kertas) bisa berbeda dengan data yang diketik ulang.</li>
+                        <li>Verifikasi Kabag dan Wadek 1 berjalan paralel, sulit dilacak jika salah satu tertahan.</li>
+                        <li>Nomor SK, PDF, tanda tangan, dan arsip email dikerjakan terpisah.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Mengapa “Non Srikandi”</h3>
+                    <ul class="clean">
+                        <li>Srikandi adalah sistem persuratan resmi Kemenag.</li>
+                        <li>SIMONS tidak menggantinya. Ia mengelola operasional fakultas: usulan skripsi, persetujuan berjenjang, dan terbitnya SK internal.</li>
+                        <li>Fokusnya tiga prodi FSHI: HTN (Siyasah), HES (Muamalah), HKI (Ahwal Syakhshiyyah).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Latar belakang</p>
+            <h2>Tiga gerbang resmi skripsi</h2>
+            <p class="lead muted">Satu mahasiswa melewati rantai yang tidak boleh terbalik. Sistem menegakkan urutan itu, bukan hanya menyimpan file.</p>
+            <div class="flow">
+                <span class="chip">1. SK Pembimbing</span>
+                <span class="chip arrow">→</span>
+                <span class="chip">2. SK Penguji</span>
+                <span class="chip arrow">→</span>
+                <span class="chip">3. Undangan Munaqasyah</span>
+            </div>
+            <table class="simple">
+                <thead>
+                    <tr><th>Gerbang</th><th>Syarat masuk</th><th>Keluaran</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SK Pembimbing</td>
+                        <td>NIM + data mahasiswa + usul pembimbing + berkas Kaprodi</td>
+                        <td>PDF SK, nomor, QR verifikasi, email</td>
+                    </tr>
+                    <tr>
+                        <td>SK Penguji</td>
+                        <td>SK Pembimbing sudah terbit untuk NIM itu</td>
+                        <td>PDF SK penguji; penguji ≠ pembimbing</td>
+                    </tr>
+                    <tr>
+                        <td>Undangan Munaqasyah</td>
+                        <td>SK Penguji sudah terbit</td>
+                        <td>Undangan sidang — masih fondasi data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Tujuan</p>
+            <h2>Apa yang ingin dicapai</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Tujuan umum</h3>
+                    <p>Menyatukan pengajuan, verifikasi, penerbitan, dan pelacakan SK skripsi FSHI dalam satu sistem yang bisa diaudit.</p>
+                </div>
+                <div class="card">
+                    <h3>Tujuan khusus</h3>
+                    <ul class="clean">
+                        <li>Mahasiswa mengajukan dan memantau tanpa datang berulang ke meja akademik.</li>
+                        <li>Setiap peran hanya melihat dan menindak wewenangnya.</li>
+                        <li>SK terbit sebagai PDF resmi ber-QR, bisa diverifikasi publik.</li>
+                        <li>Data dosen, judul, dan istilah prodi siap untuk AI rekomendasi nanti — tanpa auto-SK.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Pengguna</p>
+            <h2>Siapa memakai sistem</h2>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>Mahasiswa (publik)</h3>
+                    <p>Tanpa akun. NIM adalah kunci. Form SK Pembimbing, gerbang SK Penguji, dan halaman tracking.</p>
+                </div>
+                <div class="card">
+                    <h3>Akademik</h3>
+                    <p>Periksa berkas, sunting jika perlu, kirim ke pimpinan, atau kembalikan. Kelola master dosen, keahlian, istilah, korpus judul.</p>
+                </div>
+                <div class="card">
+                    <h3>Kabag &amp; Wadek 1</h3>
+                    <p>Verifikasi paralel. Keduanya harus setuju sebelum Dekan bisa menerbitkan SK. Bisa mengembalikan ke akademik.</p>
+                </div>
+                <div class="card">
+                    <h3>Dekan</h3>
+                    <p>Keputusan akhir. Menerbitkan SK (PDF + nomor + QR) dan memicu email ke mahasiswa.</p>
+                </div>
+                <div class="card">
+                    <h3>Superadmin</h3>
+                    <p>Kelola pengguna dan peran. Tidak menggantikan tanda tangan Dekan.</p>
+                </div>
+                <div class="card">
+                    <h3>Publik / eksternal</h3>
+                    <p>Pindai QR pada SK untuk memverifikasi keaslian dokumen tanpa masuk admin.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Bagan alur</p>
+            <h2>Rantai aplikasi secara keseluruhan</h2>
+            <p class="lead muted">Satu NIM melewati gerbang berurutan. Tahap berikutnya terkunci sampai SK tahap sebelumnya terbit.</p>
+            <div class="flow" style="justify-content:center;margin-top:1.25rem;">
+                <span class="chip">1. SK Pembimbing</span>
+                <span class="chip arrow">→ hanya jika terbit →</span>
+                <span class="chip">2. SK Penguji</span>
+                <span class="chip arrow">→ hanya jika terbit →</span>
+                <span class="chip">3. Undangan Munaqasyah</span>
+            </div>
+            <div class="lane">
+                <div class="node ok">
+                    <b>Sudah beroperasi</b>
+                    <small>Form publik, verifikasi, PDF, QR, email, tracking.</small>
+                </div>
+                <div class="node ok">
+                    <b>Sudah beroperasi</b>
+                    <small>Gerbang NIM dulu. Data SK pembimbing tampil baca saja. Lalu penguji + usulan Kaprodi.</small>
+                </div>
+                <div class="node">
+                    <b>Belum dibangun</b>
+                    <small>Tabel awal ada. Form dan PDF undangan menyusul.</small>
+                </div>
+            </div>
+            <div class="grid cols-3" style="margin-top:.4rem;">
+                <div class="card"><h3>Publik</h3><p>Form &amp; tracking lewat NIM, tanpa akun.</p></div>
+                <div class="card"><h3>Admin Filament</h3><p>Akademik, Kabag, Wadek 1, Dekan sesuai wewenang.</p></div>
+                <div class="card"><h3>Keluaran</h3><p>PDF SK, QR verifikasi, email, arsip status.</p></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Bagan alur</p>
+            <h2>Verifikasi satu permohonan SK</h2>
+            <p class="lead muted">Pola ini sama untuk SK Pembimbing dan SK Penguji. Kabag dan Wadek 1 tidak saling menunggu.</p>
+            <div class="bagan">
+                <div class="node wide">
+                    <b>Mahasiswa mengirim form</b>
+                    <small>Status: Diajukan</small>
+                </div>
+                <div class="v">↓</div>
+                <div class="node wide">
+                    <b>Akademik</b>
+                    <small>Cek berkas Kaprodi, sunting jika perlu</small>
+                </div>
+                <div class="split">
+                    <div class="col">
+                        <div class="v"><span>tolak permanen</span>↓</div>
+                        <div class="node stop"><b>Selesai ditolak</b><small>Tidak lanjut ke pimpinan</small></div>
+                    </div>
+                    <div class="mid">atau</div>
+                    <div class="col">
+                        <div class="v"><span>kirim pimpinan</span>↓</div>
+                        <div class="node gate"><b>Dikirim ke pimpinan</b><small>Antrean Kabag &amp; Wadek 1</small></div>
+                    </div>
+                </div>
+                <div class="v">↓ verifikasi paralel</div>
+                <div class="split">
+                    <div class="col">
+                        <div class="node"><b>Kabag</b><small>Setuju atau kembalikan</small></div>
+                    </div>
+                    <div class="mid">∥</div>
+                    <div class="col">
+                        <div class="node"><b>Wakil Dekan 1</b><small>Setuju atau kembalikan</small></div>
+                    </div>
+                </div>
+                <div class="split">
+                    <div class="col">
+                        <div class="v"><span>salah satu kembalikan</span>↓</div>
+                        <div class="node stop"><b>Dikembalikan ke akademik</b><small>Boleh diperbaiki, lalu kirim ulang (persetujuan pimpinan di-reset)</small></div>
+                    </div>
+                    <div class="mid">atau</div>
+                    <div class="col">
+                        <div class="v"><span>keduanya setuju</span>↓</div>
+                        <div class="node"><b>Dekan</b><small>Terbitkan SK atau kembalikan</small></div>
+                    </div>
+                </div>
+                <div class="v">↓ jika Dekan terbitkan</div>
+                <div class="node ok wide">
+                    <b>SK Terbit</b>
+                    <small>Nomor SK · PDF folio · QR verifikasi · email mahasiswa · tracking NIM</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Bagan alur</p>
+            <h2>Gerbang khusus SK Penguji</h2>
+            <p class="lead muted">Form penguji tidak dibuka sebelum sistem memastikan SK Pembimbing untuk NIM itu sudah terbit.</p>
+            <div class="bagan">
+                <div class="node wide"><b>Mahasiswa isi NIM saja</b><small>Tombol Periksa NIM</small></div>
+                <div class="v">↓</div>
+                <div class="node gate wide"><b>Sistem cek database</b><small>Ada mahasiswa? Ada SK Pembimbing berstatus terbit? Ada permohonan penguji yang masih aktif?</small></div>
+            </div>
+            <div class="split" style="margin: .8rem auto 0; width: min(38rem, 100%);">
+                <div class="col">
+                    <div class="v"><span>belum terbit / NIM tidak ada / masih aktif</span>↓</div>
+                    <div class="node stop"><b>Tidak bisa lanjut</b><small>Pesan kesalahan. Penguji 1, Penguji 2, dan unggah usulan tidak tampil.</small></div>
+                </div>
+                <div class="mid">atau</div>
+                <div class="col">
+                    <div class="v"><span>SK Pembimbing terbit</span>↓</div>
+                    <div class="node ok"><b>Form terbuka</b><small>Data mahasiswa &amp; skripsi tampil baca saja. Isi: Penguji 1, Penguji 2, unggah usulan Kaprodi.</small></div>
+                </div>
+            </div>
+            <div class="bagan">
+                <div class="v">↓ setelah kirim</div>
+                <div class="node wide"><b>Masuk alur verifikasi yang sama</b><small>Akademik → Kabag ∥ Wadek 1 → Dekan → SK Penguji terbit. Penguji tidak boleh sama dengan pembimbing.</small></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Peta jalan</p>
+            <h2>Milestone proyek</h2>
+            <table class="simple">
+                <thead>
+                    <tr><th></th><th>Milestone</th><th>Isi</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>M1</td>
+                        <td>Fondasi &amp; SK Pembimbing</td>
+                        <td>Mahasiswa terpusat, form publik, panel Filament, alur Kabag ∥ Wadek 1 → Dekan, PDF, QR, email, tracking</td>
+                        <td><span class="status done">Selesai dipakai</span></td>
+                    </tr>
+                    <tr>
+                        <td>M2</td>
+                        <td>SK Penguji</td>
+                        <td>Gerbang NIM, salin data dari SK Pembimbing, pilih penguji, unggah usulan Kaprodi, alur verifikasi identik</td>
+                        <td><span class="status done">Selesai dipakai</span></td>
+                    </tr>
+                    <tr>
+                        <td>M3</td>
+                        <td>Master data untuk AI</td>
+                        <td>Dosen + kuota + 2–5 keahlian, kamus istilah prodi, korpus judul SK terbit, halaman kesiapan data AI</td>
+                        <td><span class="status now">Data sedang diisi</span></td>
+                    </tr>
+                    <tr>
+                        <td>M4</td>
+                        <td>Undangan Munaqasyah</td>
+                        <td>Gerbang setelah SK Penguji terbit; undangan sidang — tabel sudah ada, alur belum dibangun</td>
+                        <td><span class="status next">Berikutnya</span></td>
+                    </tr>
+                    <tr>
+                        <td>M5</td>
+                        <td>AI pendamping keputusan</td>
+                        <td>Rekomendasi 3–5 dosen, cek judul mirip, gerbang judul vs prodi, rekonsiliasi PDF Kaprodi. Bukan auto-pilih.</td>
+                        <td><span class="status next">Setelah data cukup</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Milestone 1 — detail</p>
+            <h2>SK Pembimbing</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Form mahasiswa</h3>
+                    <ul class="clean">
+                        <li>NIM, identitas, prodi, semester, judul.</li>
+                        <li>Pembimbing 1 dan 2 dari daftar dosen aktif, wajib berbeda.</li>
+                        <li>Unggah usulan Kaprodi (PDF/JPG/PNG, maks. 5 MB).</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Alur status</h3>
+                    <ul class="clean">
+                        <li>Diajukan → Akademik cek berkas.</li>
+                        <li>Dikirim ke pimpinan → Kabag dan Wadek 1 memverifikasi (paralel).</li>
+                        <li>Dikembalikan ke akademik jika ada catatan.</li>
+                        <li>SK Terbit oleh Dekan: nomor <em>nnn/SK-PEMBIMBING/BB/TTTT</em>, PDF, email.</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="muted" style="margin-top:1rem;">Keputusan pejabat tetap manusia. Sistem hanya menata antrean, wewenang, dan arsip.</p>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Milestone 1 — detail</p>
+            <h2>Dokumen SK yang terbit</h2>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>PDF resmi</h3>
+                    <p>Kop fakultas, diktum pembimbing, kertas folio. Dapat dipratinjau di browser sebelum unduh.</p>
+                </div>
+                <div class="card">
+                    <h3>QR verifikasi</h3>
+                    <p>Token unik pada SK. Siapa pun bisa buka tautan verifikasi untuk memastikan dokumen sah.</p>
+                </div>
+                <div class="card">
+                    <h3>Email mahasiswa</h3>
+                    <p>Saat Dekan menerbitkan SK, notifikasi dikirim ke email yang diisi di form (SMTP fakultas).</p>
+                </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <h3>Tracking publik</h3>
+                <p>Mahasiswa memasukkan NIM di halaman tracking dan melihat status pembimbing maupun penguji tanpa login admin.</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Milestone 2 — detail</p>
+            <h2>SK Penguji</h2>
+            <p class="lead muted">Penguji tidak boleh diajukan sebelum pembimbing resmi. Form tidak menampilkan isian penguji sampai NIM lolos gerbang.</p>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Langkah 1 — NIM saja</h3>
+                    <ul class="clean">
+                        <li>Mahasiswa hanya mengisi NIM, lalu Periksa NIM.</li>
+                        <li>Jika SK Pembimbing belum terbit: tidak bisa lanjut.</li>
+                        <li>Jika masih ada permohonan penguji aktif: diarahkan ke tracking.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Langkah 2 — form terbuka</h3>
+                    <ul class="clean">
+                        <li>Data tampil baca saja: nama, TTL, alamat, HP, email, prodi, semester, judul, nomor SK, pembimbing 1 &amp; 2.</li>
+                        <li>Yang diisi: Penguji 1, Penguji 2, unggah usulan Kaprodi.</li>
+                        <li>Penguji wajib berbeda satu sama lain dan berbeda dari pembimbing pada SK yang sudah terbit.</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="muted" style="margin-top:1rem;">Judul dan semester disalin dari SK Pembimbing di server, bukan dari ketikan ulang mahasiswa. Alur akademik → pimpinan → Dekan sama dengan SK Pembimbing. Nomor SK memakai seri SK-PENGUJI.</p>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Milestone 3 — detail</p>
+            <h2>Master data agar AI bisa jalan nanti</h2>
+            <p class="lead muted">Model belum dilatih. Yang dibangun adalah bahan bakarnya, dikelola akademik di grup navigasi Master Data.</p>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Data Dosen</h3>
+                    <p>Nama (seperti di SK), NIP, aktif/nonaktif, kuota pembimbing/penguji, 2–5 keahlian, catatan minat.</p>
+                </div>
+                <div class="card">
+                    <h3>Keahlian Dosen</h3>
+                    <p>Kamus minat: misalnya hadhanah, perbankan syariah, siyasah dusturiyah. Bisa tertaut satu prodi atau lintas.</p>
+                </div>
+                <div class="card">
+                    <h3>Istilah Prodi</h3>
+                    <p>Kata kunci judul per HTN / HES / HKI (murabahah, hadhanah, pilkada, …) untuk gerbang judul vs prodi.</p>
+                </div>
+                <div class="card">
+                    <h3>Korpus Judul</h3>
+                    <p>Judul dari SK yang sudah terbit, dinormalisasi, siap dibandingkan kemiripan. Bisa ditandai “mirip” untuk label latih.</p>
+                </div>
+            </div>
+            <p class="muted" style="margin-top:1rem;">Halaman Kesiapan Data AI menghitung: berapa dosen yang sudah punya minimal 2 keahlian, berapa istilah per prodi, berapa judul di korpus, berapa nama pembimbing yang tertaut ke master dosen.</p>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Milestone 4 &amp; 5 — rencana</p>
+            <h2>Yang belum dibangun</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>M4 · Undangan Munaqasyah</h3>
+                    <p>Tabel awal sudah ada. Alur lengkap (form, verifikasi, PDF undangan) menyusul setelah SK Penguji terbukti dipakai lancar. Syarat masuk: SK Penguji berstatus terbit.</p>
+                </div>
+                <div class="card">
+                    <h3>M5 · AI pendamping</h3>
+                    <p>Empat keluaran yang dirancang: ranking 3–5 dosen, 3 judul terdekat, peringatan judul vs prodi, flag usulan Kaprodi vs form. Pejabat tetap memutuskan.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Fungsi sistem</p>
+            <h2>Untuk mahasiswa</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Mengajukan</h3>
+                    <ul class="clean">
+                        <li>Usul pembimbing kapan saja, tanpa antre loket.</li>
+                        <li>Usul penguji hanya setelah SK pembimbing sah di sistem.</li>
+                        <li>Tidak perlu mengetik ulang identitas pada SK penguji.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Memantau</h3>
+                    <ul class="clean">
+                        <li>Tracking NIM: diajukan, di pimpinan, dikembalikan, atau SK terbit.</li>
+                        <li>Email saat SK terbit.</li>
+                        <li>Unduh PDF SK; pihak lain bisa cek keaslian lewat QR.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Fungsi sistem</p>
+            <h2>Untuk akademik dan pimpinan</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Akademik</h3>
+                    <ul class="clean">
+                        <li>Daftar permohonan terpisah: pembimbing vs penguji.</li>
+                        <li>Lihat berkas usulan Kaprodi, sunting data jika ejaan salah.</li>
+                        <li>Kirim ke pimpinan atau kembalikan dengan catatan.</li>
+                        <li>Jaga master dosen agar pilihan di form publik selalu akurat.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Kabag, Wadek 1, Dekan</h3>
+                    <ul class="clean">
+                        <li>Hanya permohonan yang sudah dikirim akademik yang masuk antrean mereka.</li>
+                        <li>Setuju / kembalikan dengan catatan, jejak waktu tersimpan.</li>
+                        <li>Dekan menerbitkan SK setelah kedua pimpinan setuju.</li>
+                        <li>Pratinjau HTML SK sebelum PDF digenerate.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Manfaat</p>
+            <h2>Manfaat operasional hari ini</h2>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>Transparansi</h3>
+                    <p>Mahasiswa tidak perlu menebak “berkas sudah di meja siapa”. Status mengikuti NIM.</p>
+                </div>
+                <div class="card">
+                    <h3>Disiplin wewenang</h3>
+                    <p>Akademik tidak bisa menerbitkan SK. Dekan tidak bekerja sebelum Kabag dan Wadek 1 selesai.</p>
+                </div>
+                <div class="card">
+                    <h3>Satu sumber data</h3>
+                    <p>Identitas mahasiswa dan judul SK penguji mengikuti SK pembimbing yang sudah terbit. Mengurangi ketidaksinkronan.</p>
+                </div>
+                <div class="card">
+                    <h3>Arsip yang bisa dicek</h3>
+                    <p>PDF, nomor, token QR, dan log verifikasi tersimpan. SK tidak hanya file di folder pribadi.</p>
+                </div>
+                <div class="card">
+                    <h3>Beban meja berkurang</h3>
+                    <p>Penerimaan usulan dan pelacakan status pindah dari loket ke form. Pejabat fokus menimbang, bukan mencari berkas.</p>
+                </div>
+                <div class="card">
+                    <h3>Siap tahap berikutnya</h3>
+                    <p>Rantai pembimbing → penguji → munaqasyah sudah tertanam di data, bukan ditambahkan belakangan.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Manfaat</p>
+            <h2>Manfaat ke depan: AI sebagai usulan, bukan SK</h2>
+            <p class="lead muted">Nilai riset SIMONS bukan chatbot, melainkan rekomendasi dosen yang patuh aturan fakultas syariah.</p>
+            <table class="simple">
+                <thead>
+                    <tr><th>Keluaran AI</th><th>Manfaat</th><th>Batas</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>3–5 nama dosen + alasan + skor</td>
+                        <td>Membantu Kaprodi/akademik menyeimbangkan keahlian dan beban</td>
+                        <td>Manusia yang memilih; form tidak terisi sendiri</td>
+                    </tr>
+                    <tr>
+                        <td>Judul mirip di gerbang SK</td>
+                        <td>Mencegah topik kembar sebelum pembimbing ditetapkan</td>
+                        <td>Peringatan, bukan tolak otomatis</td>
+                    </tr>
+                    <tr>
+                        <td>Judul vs prodi (HTN/HES/HKI)</td>
+                        <td>Menandai judul muamalah yang masuk ke HTN, dan sebaliknya</td>
+                        <td>Peringatan domain</td>
+                    </tr>
+                    <tr>
+                        <td>Rekonsiliasi PDF Kaprodi</td>
+                        <td>Nama/judul di berkas dibanding form sebelum ke pimpinan</td>
+                        <td>Akademik yang mengesahkan</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Rumus AI (rancangan, belum dilatih)</p>
+            <h2>Bagaimana dosen akan diurutkan</h2>
+            <div class="card">
+                <p style="color:var(--ink); font-size:1.05rem; line-height:1.6;">
+                    S(d) = 0,45·keahlian + 0,20·prodi + 0,20·histori judul SK + 0,15·sisa kuota
+                </p>
+                <p class="muted" style="margin-top:.7rem;">Dosen dihapus dari daftar jika nonaktif, kuota penuh, atau (untuk penguji) sama dengan pembimbing. Setelah 300–800 SK terbit, bobot bisa dipelajari otomatis; aturan keras tetap.</p>
+            </div>
+            <div class="grid cols-2" style="margin-top:1rem;">
+                <div class="card">
+                    <h3>Prasyarat data</h3>
+                    <p>Setiap dosen aktif berlabel 2–5 keahlian. Kamus istilah terisi. Korpus judul tumbuh setiap SK terbit.</p>
+                </div>
+                <div class="card">
+                    <h3>Yang tidak akan terjadi</h3>
+                    <p>ChatGPT menulis diktum. Sistem menyetujui permohonan. SK terbit karena skor tertinggi.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">SPBE · lingkup jujur</p>
+            <h2>Posisi SIMONS di IAIN Bone</h2>
+            <p class="lead muted">Dasar hukum sudah di halaman 2–4. Di sini hanya dipertegas: SIMONS adalah bukti layanan unit FSHI, bukan arsitektur SPBE seluruh kampus, dan bukan pengganti Srikandi.</p>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Bukan pengganti Srikandi</h3>
+                    <p>Srikandi adalah tata naskah dinas resmi. SIMONS adalah lapisan operasional fakultas: usulan skripsi, verifikasi berjenjang, dan terbitnya SK internal FSHI. Keduanya saling melengkapi.</p>
+                </div>
+                <div class="card">
+                    <h3>Lingkup yang jujur</h3>
+                    <p>SIMONS tidak mengklaim menjadi arsitektur SPBE seluruh kampus. Ia contoh aplikasi layanan unit (FSHI) yang proses bisnisnya sudah digital, teraudit, dan berurutan — bahan nyata untuk indeks layanan SPBE IAIN Bone.</p>
+                </div>
+            </div>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>Layanan publik</h3>
+                    <p>Mahasiswa mengajukan dan meninjau SK tanpa loket. Termasuk layanan kepada pengguna di lingkungan instansi.</p>
+                </div>
+                <div class="card">
+                    <h3>Layanan administrasi</h3>
+                    <p>Akademik dan pimpinan memverifikasi sesuai jabatan. Jejak waktu dan catatan tersimpan.</p>
+                </div>
+                <div class="card">
+                    <h3>Proses bisnis digital</h3>
+                    <p>Aturan fakultas tidak hanya di SOP kertas. Sistem menolak loncat wewenang dan loncat gerbang SK.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Aturan tertanam</p>
+            <h2>SOP yang tidak bisa dilangkahi</h2>
+            <p class="lead muted">Inovasi utamanya: aturan FSHI ditulis sebagai logika aplikasi. Yang tidak sah secara proses, tidak bisa disimpan.</p>
+            <table class="simple">
+                <thead>
+                    <tr><th>Aturan fakultas</th><th>Bagaimana sistem menegakkannya</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Penguji hanya setelah pembimbing resmi</td>
+                        <td>Gerbang NIM: form penguji tertutup jika SK Pembimbing belum terbit.</td>
+                    </tr>
+                    <tr>
+                        <td>Penguji ≠ pembimbing; dua penguji berbeda</td>
+                        <td>Validasi nama terhadap SK pembimbing yang sudah terbit dan terhadap satu sama lain.</td>
+                    </tr>
+                    <tr>
+                        <td>Akademik memeriksa, bukan menandatangani SK</td>
+                        <td>Akademik hanya kirim/kembalikan/tolak. Tombol terbit SK tidak ada di peran ini.</td>
+                    </tr>
+                    <tr>
+                        <td>Kabag dan Wadek 1 sama-sama wajib</td>
+                        <td>Verifikasi paralel. Dekan terkunci sampai keduanya berstatus disetujui.</td>
+                    </tr>
+                    <tr>
+                        <td>Dekan yang menerbitkan</td>
+                        <td>Nomor SK, PDF, QR, dan email hanya jalan dari aksi Dekan.</td>
+                    </tr>
+                    <tr>
+                        <td>Berkas usulan Kaprodi wajib</td>
+                        <td>File PDF/JPG/PNG menjadi syarat kirim; akademik dapat melihatnya sebelum ke pimpinan.</td>
+                    </tr>
+                    <tr>
+                        <td>Data SK penguji tidak boleh “ketik ulang liar”</td>
+                        <td>Judul, semester, dan identitas diambil dari SK Pembimbing di server.</td>
+                    </tr>
+                    <tr>
+                        <td>Jika dikembalikan, persetujuan lama tidak berlaku</td>
+                        <td>Kirim ulang mereset status pimpinan. Tidak ada jalan pintas “sudah ditandatangani kemarin”.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Inovasi</p>
+            <h2>Yang membedakan SIMONS dari “form biasa”</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Gerbang NIM, bukan form panjang</h3>
+                    <p>SK Penguji memaksa satu langkah bukti dulu. Mahasiswa tidak mengisi penguji sebelum haknya ada. Jarang pada sistem kampus yang hanya menyalin seluruh form.</p>
+                </div>
+                <div class="card">
+                    <h3>Paralel, bukan antrean fiktif</h3>
+                    <p>Kabag dan Wadek 1 bekerja bersamaan. Sistem meniru rapat pimpinan yang sesungguhnya, lalu mengunci Dekan sampai keduanya selesai.</p>
+                </div>
+                <div class="card">
+                    <h3>SK yang bisa diuji keasliannya</h3>
+                    <p>QR + tautan verifikasi publik. Pihak luar tidak perlu akun admin untuk memastikan PDF bukan hasil edit.</p>
+                </div>
+                <div class="card">
+                    <h3>Satu identitas, banyak gerbang</h3>
+                    <p>NIM adalah kunci mahasiswa. Tracking, email, dan rantai pembimbing–penguji–munaqasyah memakai data yang sama.</p>
+                </div>
+                <div class="card">
+                    <h3>Human-in-the-loop by design</h3>
+                    <p>Digitalisasi tidak meniadakan pejabat. AI yang dirancang nanti hanya mengusulkan; SK tetap keputusan manusia.</p>
+                </div>
+                <div class="card">
+                    <h3>Siap kecerdasan yang patuh aturan</h3>
+                    <p>Keahlian dosen, kuota, kamus istilah, korpus judul — fondasi rekomendasi yang menolak penguji = pembimbing, bukan chatbot generik.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">SPBE · IAIN Bone</p>
+            <h2>Bagaimana ini mendukung SPBE kampus</h2>
+            <table class="simple">
+                <thead>
+                    <tr><th>Domain SPBE yang tersentuh</th><th>Bukti di SIMONS</th><th>Manfaat bagi IAIN Bone</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Layanan SPBE kepada pengguna</td>
+                        <td>Form publik, tracking NIM, unduh SK, verifikasi QR</td>
+                        <td>Layanan kemahasiswaan FSHI terukur, tidak hanya loket.</td>
+                    </tr>
+                    <tr>
+                        <td>Layanan administrasi pemerintahan / satker</td>
+                        <td>Alur akademik → Kabag ∥ Wadek 1 → Dekan</td>
+                        <td>Tata kelola internal mengikuti struktur organisasi fakultas.</td>
+                    </tr>
+                    <tr>
+                        <td>Penerapan arsitektur proses bisnis</td>
+                        <td>Gerbang SK berurutan; status dan wewenang diprogram</td>
+                        <td>SOP skripsi FSHI bisa dievaluasi, bukan hanya diarsip Word.</td>
+                    </tr>
+                    <tr>
+                        <td>Aplikasi SPBE (khusus / generik unit)</td>
+                        <td>Aplikasi web sendiri, terpisah Srikandi, tetap selaras naskah dinas</td>
+                        <td>Contoh aplikasi unit kerja yang bisa masuk inventaris TIK kampus.</td>
+                    </tr>
+                    <tr>
+                        <td>Keamanan &amp; kendali akses</td>
+                        <td>Login peran, kebijakan Filament, jejak siapa menyetujui kapan</td>
+                        <td>Mengurangi SK “atas nama” tanpa rekam digital.</td>
+                    </tr>
+                    <tr>
+                        <td>Keterpaduan data</td>
+                        <td>Master mahasiswa, dosen, judul dari SK terbit</td>
+                        <td>Modal satu data fakultas; siap dihubungkan ke sistem kampus lain nanti.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="muted" style="margin-top:.9rem;">Untuk rapat pimpinan kampus: SIMONS adalah bukti bahwa FSHI sudah mengeksekusi layanan digital berproses, bukan baru merencanakan portal.</p>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Teknologi</p>
+            <h2>Stack yang dipakai</h2>
+            <div class="grid cols-4">
+                <div class="card"><h3>Laravel 10</h3><p>PHP 8.1, alur bisnis, kebijakan akses, dan penyimpanan berkas.</p></div>
+                <div class="card"><h3>Filament 3 + Livewire 3</h3><p>Panel admin per peran, master data, pratinjau SK.</p></div>
+                <div class="card"><h3>Jetstream 4</h3><p>Autentikasi sesi admin (login akademik &amp; pimpinan).</p></div>
+                <div class="card"><h3>MySQL 8</h3><p>Basis data mahasiswa, permohonan, dosen, dan korpus judul.</p></div>
+                <div class="card"><h3>DomPDF + QR</h3><p>PDF SK folio dan token verifikasi publik.</p></div>
+                <div class="card"><h3>Vite + Tailwind</h3><p>Aset form publik mahasiswa dan tampilan tracking.</p></div>
+                <div class="card"><h3>Email SMTP</h3><p>Notifikasi terbit SK ke email mahasiswa.</p></div>
+                <div class="card"><h3>Laragon / PHP built-in</h3><p>Lingkungan yang teruji: Windows, <code>localhost:8000</code>.</p></div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Teknologi</p>
+            <h2>Requirement development</h2>
+            <p class="lead muted">Ini yang harus disiapkan prakom di komputer kerja agar bisa mengembangkan dan menjalankan SIMONS di lokal — bukan spesifikasi HP mahasiswa.</p>
+            <table class="simple">
+                <thead>
+                    <tr><th>Kebutuhan</th><th>Spesifikasi</th><th>Untuk apa</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Komputer kerja</td>
+                        <td>Windows 10/11 · RAM 8 GB (nyaman 16 GB) · disk bebas ±40 GB</td>
+                        <td>PHP + MySQL + Node + browser admin Filament jalan bersamaan.</td>
+                    </tr>
+                    <tr>
+                        <td>Lingkungan lokal</td>
+                        <td>Laragon (teruji) atau XAMPP · PHP 8.1.x (teruji 8.1.10)</td>
+                        <td>Web server dan PHP. Alternatif: <code>php artisan serve</code>.</td>
+                    </tr>
+                    <tr>
+                        <td>Alat pemasangan paket</td>
+                        <td>Composer 2.x · Node.js 18+ LTS · NPM · Git</td>
+                        <td><code>composer install</code>, <code>npm install</code> / <code>npm run dev</code>, versi kode.</td>
+                    </tr>
+                    <tr>
+                        <td>Basis data lokal</td>
+                        <td>MySQL 8.x (atau MariaDB setara)</td>
+                        <td>Migrasi, seeder akun, data dosen, permohonan.</td>
+                    </tr>
+                    <tr>
+                        <td>Extensi PHP</td>
+                        <td>bcmath, curl, dom, fileinfo, mbstring, openssl, pdo_mysql, tokenizer, xml, gd atau imagick</td>
+                        <td>Laravel, unggah berkas, PDF, dan QR pada SK.</td>
+                    </tr>
+                    <tr>
+                        <td>Editor &amp; uji</td>
+                        <td>VS Code (atau setara) · Chrome/Edge · klien MySQL (HeidiSQL/phpMyAdmin)</td>
+                        <td>Menulis kode, uji form/admin, cek tabel.</td>
+                    </tr>
+                    <tr>
+                        <td>Email uji (opsional)</td>
+                        <td>SMTP sandbox (Mailpit/Mailtrap/Brevo uji)</td>
+                        <td>Memastikan notifikasi SK terbit terkirim tanpa menyentuh inbox mahasiswa sungguhan.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Durasi — asumsi</p>
+            <h2>1 prakom, tanpa asisten AI</h2>
+            <p class="lead muted">Perkiraan kerja normal manusia. Bukan kontrak resmi. Tanpa Cursor/ChatGPT, Filament dipelajari sambil mengerjakan.</p>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>Siapa</h3>
+                    <p>Satu Pranata Komputer (Ahli Pertama/Muda), menguasai PHP dan SQL dasar, belum tentu mahir Filament 3.</p>
+                </div>
+                <div class="card">
+                    <h3>Jam efektif</h3>
+                    <p>5 jam koding/hari × 5 hari = 25 jam/minggu. Sisa jam untuk rapat, helpdesk, dan administrasi kampus.</p>
+                </div>
+                <div class="card">
+                    <h3>Cakupan</h3>
+                    <p>Modul operasional SK (pembimbing, penguji, munaqasyah, uji, deploy). Modul model AI tidak dihitung di sini.</p>
+                </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <h3>Dua angka yang berbeda</h3>
+                <p><strong>Dari nol</strong> = seandainya proyek ini ditulis ulang sendirian. <strong>Kedepan</strong> = sisa pekerjaan dari kondisi sekarang (M1–M3 sudah ada).</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Durasi — dari nol</p>
+            <h2>Kalau 1 prakom membangun ulang tanpa AI</h2>
+            <table class="simple">
+                <thead>
+                    <tr><th>Bagian</th><th>Isi kerja</th><th>Perkiraan</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>M1 SK Pembimbing</td>
+                        <td>Form publik, role, alur paralel Kabag/Wadek 1, PDF, QR, email, tracking, kebijakan akses</td>
+                        <td>9–11 minggu</td>
+                    </tr>
+                    <tr>
+                        <td>M2 SK Penguji</td>
+                        <td>Gerbang NIM, salin data SK pembimbing, aturan penguji ≠ pembimbing, duplikasi alur verifikasi</td>
+                        <td>4–5 minggu</td>
+                    </tr>
+                    <tr>
+                        <td>M3 Master data</td>
+                        <td>Dosen, keahlian, istilah prodi, korpus judul, sinkron SK → data, halaman kesiapan</td>
+                        <td>3–4 minggu</td>
+                    </tr>
+                    <tr>
+                        <td>Uji, perapihan, deploy</td>
+                        <td>UAT fakultas, SMTP, cadangan, perbaikan ejaan/akses, dokumentasi singkat</td>
+                        <td>3–4 minggu</td>
+                    </tr>
+                    <tr>
+                        <td>Total tanpa modul AI</td>
+                        <td>End-to-end operasional SK pembimbing &amp; penguji + fondasi data</td>
+                        <td><strong>4,5–6 bulan</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="muted" style="margin-top:.85rem;">Jika tugas IT kampus menyita setengah waktu (bukan full proyek), kalikan ±2 → sekitar 9–12 bulan.</p>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Durasi — kedepan</p>
+            <h2>Sisa pekerjaan 1 prakom, tanpa asisten AI</h2>
+            <p class="lead muted">Kode M1–M3 sudah ada. Yang dihitung hanya kelanjutan operasional, bukan menulis ulang, bukan membangun model AI.</p>
+            <table class="simple">
+                <thead>
+                    <tr><th>Pekerjaan</th><th>Isi</th><th>Full tugas proyek</th><th>Sambil tugas kampus (~50%)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>M4 Undangan Munaqasyah</td>
+                        <td>Gerbang setelah SK penguji terbit, form, alur verifikasi, PDF undangan — pola mengikuti penguji</td>
+                        <td>4–6 minggu</td>
+                        <td>8–12 minggu</td>
+                    </tr>
+                    <tr>
+                        <td>Produksi &amp; UAT</td>
+                        <td>Server fakultas, HTTPS, SMTP sungguhan, cadangan, uji bersama akademik</td>
+                        <td>2–3 minggu</td>
+                        <td>4–6 minggu</td>
+                    </tr>
+                    <tr>
+                        <td>Perawatan awal</td>
+                        <td>Perbaikan umpan balik pengguna, dokumentasi, serah terima</td>
+                        <td>1–2 minggu</td>
+                        <td>2–4 minggu</td>
+                    </tr>
+                    <tr>
+                        <td>Jumlah kedepan</td>
+                        <td>Tanpa modul rekomendasi AI</td>
+                        <td><strong>7–11 minggu</strong><br>(±2–3 bulan)</td>
+                        <td><strong>4–6 bulan</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Durasi — catatan</p>
+            <h2>Apa yang mempercepat atau memperlambat</h2>
+            <div class="grid cols-2">
+                <div class="card">
+                    <h3>Lebih cepat</h3>
+                    <ul class="clean">
+                        <li>Pola SK Penguji sudah jadi cetakan untuk munaqasyah.</li>
+                        <li>Akademik sudah paham alur admin, UAT tidak dari nol.</li>
+                        <li>Master dosen dan istilah sudah terisi, bukan dikoding.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Lebih lambat</h3>
+                    <ul class="clean">
+                        <li>Prakom baru belajar Filament/Livewire tanpa contoh internal.</li>
+                        <li>Perubahan aturan fakultas di tengah jalan (status, wewenang, kop SK).</li>
+                        <li>Server kampus, DNS, dan SMTP terlambat disediakan.</li>
+                        <li>Helpdesk harian menggerus jam koding.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <h3>Modul AI (jika dikerjakan belakangan, tetap tanpa asisten AI)</h3>
+                <p>Rekomendasi dosen + judul mirip + gerbang prodi + baca PDF Kaprodi: tambahan kira-kira <strong>3–5 bulan</strong> untuk 1 prakom (riset rumus, uji, dan tampilan). Itu terpisah dari 2–3 bulan sisa operasional di atas.</p>
+            </div>
+        </section>
+
+        <section class="slide">
+            <p class="kicker">Ringkasan</p>
+            <h2>Posisi proyek sekarang</h2>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>Sudah hidup</h3>
+                    <p>SK Pembimbing dan SK Penguji end-to-end: form, gerbang urutan, verifikasi paralel, PDF, email, tracking.</p>
+                </div>
+                <div class="card">
+                    <h3>Perlu diisi manusia</h3>
+                    <p>Keahlian tiap dosen, kamus istilah per prodi, dan pemakaian rutin agar korpus judul tumbuh.</p>
+                </div>
+                <div class="card">
+                    <h3>Belum dikode</h3>
+                    <p>Undangan munaqasyah lengkap, ranking dosen, OCR usulan Kaprodi, dan gerbang kemiripan judul.</p>
+                </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <h3>Kalimat penutup yang aman dipakai di sidang/rapat</h3>
+                <p>SIMONS menata operasional SK skripsi FSHI agar sah, terlacak, dan berurutan. Aturan fakultas tertanam di sistem, bukan hanya di SOP. Itu kontribusi konkret layanan digital unit kerja bagi SPBE IAIN Bone — tanpa mengganti Srikandi, dan tanpa mengganti Dekan.</p>
+            </div>
+        </section>
+
+        <section class="slide cover">
+            <div class="topbar">
+                <div class="logos">
+                    <img src="logokemenag.png" alt="Logo Kementerian Agama">
+                    <img src="logoiainbone.png" alt="Logo IAIN Bone">
+                </div>
+            </div>
+            <p class="kicker">Terima kasih</p>
+            <h1>SIMONS</h1>
+            <p class="lead">Sistem Manajemen Operasional Non Srikandi<br>Fakultas Syariah dan Hukum Islam · IAIN Bone</p>
+            <div class="banner">Karya ini sangat mendukung SPBE IAIN Bone — layanan skripsi FSHI yang sudah bertransaksi, teraudit, dan siap dipakai sebagai bukti asesmen.</div>
+            <p class="muted" style="margin-top:2rem;">Navigasi: panah atau spasi · F layar penuh · cetak ke PDF lewat browser jika perlu salinan.</p>
+        </section>
+    </template>
+
+    <script>
+        (function () {
+            const viewport = document.getElementById('viewport');
+            const source = document.getElementById('slides');
+            const slides = Array.from(source.content.children);
+            slides.forEach(function (slide) { viewport.appendChild(slide); });
+
+            let i = 0;
+            const counter = document.getElementById('counter');
+            const fill = document.getElementById('fill');
+
+            function show(n) {
+                i = Math.max(0, Math.min(slides.length - 1, n));
+                slides.forEach(function (slide, idx) {
+                    slide.classList.toggle('is-on', idx === i);
+                });
+                counter.textContent = (i + 1) + ' / ' + slides.length;
+                fill.style.width = ((i + 1) / slides.length * 100) + '%';
+                viewport.querySelector('.slide.is-on').scrollTop = 0;
+            }
+
+            document.getElementById('prev').addEventListener('click', function () { show(i - 1); });
+            document.getElementById('next').addEventListener('click', function () { show(i + 1); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                    e.preventDefault();
+                    show(i + 1);
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                    e.preventDefault();
+                    show(i - 1);
+                } else if (e.key === 'Home') {
+                    show(0);
+                } else if (e.key === 'End') {
+                    show(slides.length - 1);
+                } else if (e.key === 'f' || e.key === 'F') {
+                    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                    else document.exitFullscreen();
+                }
+            });
+
+            show(0);
+        })();
+    </script>
+</body>
+</html>

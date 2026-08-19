@@ -16,6 +16,32 @@ class StorePermohonanPembimbingRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $trimKeys = [
+            'nim',
+            'nama_lengkap',
+            'tempat_lahir',
+            'alamat_lengkap',
+            'no_hp',
+            'email',
+            'judul_skripsi',
+            'pembimbing_1',
+            'pembimbing_2',
+        ];
+
+        $trimmed = [];
+        foreach ($trimKeys as $key) {
+            if ($this->has($key) && is_string($this->input($key))) {
+                $trimmed[$key] = trim($this->input($key));
+            }
+        }
+
+        if ($trimmed !== []) {
+            $this->merge($trimmed);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -29,8 +55,19 @@ class StorePermohonanPembimbingRequest extends FormRequest
             'program_studi' => ['required', Rule::enum(ProgramStudi::class)],
             'judul_skripsi' => ['required', 'string', 'max:500'],
             'semester' => ['required', 'integer', 'min:1', 'max:14'],
-            'pembimbing_1' => ['required', 'string', 'max:255'],
-            'pembimbing_2' => ['required', 'string', 'max:255'],
+            'pembimbing_1' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::exists('dosens', 'nama')->where('is_active', true),
+            ],
+            'pembimbing_2' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::exists('dosens', 'nama')->where('is_active', true),
+                'different:pembimbing_1',
+            ],
             'file_usul_pembimbing' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ];
     }
@@ -60,6 +97,30 @@ class StorePermohonanPembimbingRequest extends FormRequest
                 );
             }
         });
+    }
+
+    public function messages(): array
+    {
+        return [
+            'nim.required' => 'NIM wajib diisi.',
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+            'tempat_lahir.required' => 'Tempat lahir wajib diisi.',
+            'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+            'alamat_lengkap.required' => 'Alamat lengkap wajib diisi.',
+            'no_hp.required' => 'Nomor HP wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'program_studi.required' => 'Program studi wajib dipilih.',
+            'judul_skripsi.required' => 'Judul skripsi wajib diisi.',
+            'semester.required' => 'Semester wajib diisi.',
+            'pembimbing_1.required' => 'Pembimbing 1 wajib dipilih.',
+            'pembimbing_2.required' => 'Pembimbing 2 wajib dipilih.',
+            'pembimbing_1.exists' => 'Pembimbing 1 harus dipilih dari daftar dosen aktif.',
+            'pembimbing_2.exists' => 'Pembimbing 2 harus dipilih dari daftar dosen aktif.',
+            'pembimbing_2.different' => 'Pembimbing 1 dan Pembimbing 2 tidak boleh sama.',
+            'file_usul_pembimbing.required' => 'File usul pembimbing dari Prodi wajib diunggah.',
+            'file_usul_pembimbing.mimes' => 'File usul pembimbing harus berformat PDF, JPG, atau PNG.',
+            'file_usul_pembimbing.max' => 'Ukuran file usul pembimbing maksimal 5 MB.',
+        ];
     }
 
     public function attributes(): array

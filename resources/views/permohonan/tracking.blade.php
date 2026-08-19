@@ -99,7 +99,8 @@
                 <img src="{{ asset('logoiainbone.png') }}" alt="Logo IAIN Bone">
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-                <a href="{{ route('home') }}">Ajukan</a>
+                <a href="{{ route('home') }}">SK Pembimbing</a>
+                <a href="{{ route('penguji.create') }}">SK Penguji</a>
                 <a href="{{ url('/admin') }}" class="primary">Login Admin</a>
             </div>
         </nav>
@@ -138,8 +139,9 @@
                     $pengujiTerbaru = $mahasiswa->permohonanPenguji->first();
                     $munaqasyahTerbaru = $mahasiswa->undanganMunaqasyah->first();
                     $labelPembimbing = $pembimbingTerbaru?->status?->label() ?? 'Belum diajukan';
-                    $labelPenguji = $pengujiTerbaru?->status ?? 'Belum dibuka';
+                    $labelPenguji = $pengujiTerbaru?->status?->label() ?? 'Belum diajukan';
                     $labelMunaqasyah = $munaqasyahTerbaru?->status ?? 'Belum dibuka';
+                    $bisaAjukanPenguji = $mahasiswa->bisaAjukanPenguji();
                 @endphp
 
                 <article class="card">
@@ -153,7 +155,12 @@
                         </div>
                         <div class="pipe-step">
                             <strong>2. SK Penguji</strong>
-                            <p>{{ is_string($labelPenguji) ? str_replace('_', ' ', $labelPenguji) : $labelPenguji }}</p>
+                            <p>{{ $labelPenguji }}</p>
+                            @if ($bisaAjukanPenguji)
+                                <p style="margin:.55rem 0 0;">
+                                    <a href="{{ route('penguji.create') }}" style="color:var(--forest);font-weight:700;">Ajukan SK Penguji</a>
+                                </p>
+                            @endif
                         </div>
                         <div class="pipe-step">
                             <strong>3. Undangan Munaqasyah</strong>
@@ -271,6 +278,111 @@
                 @empty
                     <div class="card" style="color:var(--muted);">
                         Belum ada permohonan SK Pembimbing untuk mahasiswa ini.
+                    </div>
+                @endforelse
+
+                @forelse ($mahasiswa->permohonanPenguji as $item)
+                    @php
+                        $statusColor = match ($item->status) {
+                            \App\Enums\StatusPermohonan::SkTerbit => 'background:#e8f5ee;color:#14532d;',
+                            \App\Enums\StatusPermohonan::Ditolak => 'background:#fde8e8;color:#9b1c1c;',
+                            \App\Enums\StatusPermohonan::DikembalikanAkademik => 'background:#e8f0fe;color:#1e40af;',
+                            \App\Enums\StatusPermohonan::DikirimPimpinan => 'background:#fff7e6;color:#92400e;',
+                            default => 'background:#f3f4f6;color:#374151;',
+                        };
+                    @endphp
+                    <article class="card">
+                        <div style="display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:flex-start;">
+                            <div>
+                                <h2 class="brand-font" style="margin:0;font-size:1.25rem;color:var(--forest);">SK Penguji</h2>
+                                <p style="margin:.3rem 0 0;color:var(--muted);font-size:.92rem;">
+                                    Diajukan {{ $item->created_at?->translatedFormat('d F Y H:i') }}
+                                </p>
+                            </div>
+                            <span class="badge" style="{{ $statusColor }}">{{ $item->status->label() }}</span>
+                        </div>
+
+                        <div class="data-grid">
+                            <div class="data-item"><span>Semester</span><p>{{ $item->semester }}</p></div>
+                            <div class="data-item full"><span>Judul Skripsi</span><p>{{ $item->judul_skripsi }}</p></div>
+                            <div class="data-item"><span>Penguji 1</span><p>{{ $item->penguji_1 }}</p></div>
+                            <div class="data-item"><span>Penguji 2</span><p>{{ $item->penguji_2 ?: '-' }}</p></div>
+                            <div class="data-item full">
+                                <span>File Usulan dari Kaprodi</span>
+                                <p>
+                                    @if ($item->file_usul_url)
+                                        <a href="{{ $item->file_usul_url }}" target="_blank" rel="noopener" style="color:var(--forest);font-weight:700;">
+                                            Lihat / unduh berkas
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
+                                </p>
+                            </div>
+                            @if ($item->nomor_sk)
+                                <div class="data-item"><span>Nomor SK</span><p>{{ $item->nomor_sk }}</p></div>
+                                <div class="data-item"><span>Tanggal SK</span><p>{{ $item->tanggal_sk?->translatedFormat('d F Y') ?: '-' }}</p></div>
+                            @endif
+                            @if ($item->file_sk)
+                                <div class="data-item full">
+                                    <span>File SK</span>
+                                    <p>
+                                        <a href="{{ route('sk.penguji.download', $item) }}" style="color:var(--forest);font-weight:700;">
+                                            Unduh PDF SK Penguji
+                                        </a>
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <h3 style="margin:1.35rem 0 .35rem;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--leaf);">
+                            Catatan Perizinan
+                        </h3>
+
+                        <div class="note-box">
+                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">Akademik</p>
+                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->akademik_catatan ?: 'Belum ada catatan' }}</p>
+                            @if ($item->akademik_dikirim_at)
+                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">Dikirim {{ $item->akademik_dikirim_at->translatedFormat('d F Y H:i') }}</p>
+                            @endif
+                        </div>
+                        <div class="note-box">
+                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
+                                Kabag — {{ $item->formatRoleStatus($item->kabag_status) }}
+                            </p>
+                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->kabag_catatan ?: 'Belum ada catatan' }}</p>
+                            @if ($item->kabag_verified_at)
+                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->kabag_verified_at->translatedFormat('d F Y H:i') }}</p>
+                            @endif
+                        </div>
+                        <div class="note-box">
+                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
+                                Wadek 1 — {{ $item->formatRoleStatus($item->wadek1_status) }}
+                            </p>
+                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->wadek1_catatan ?: 'Belum ada catatan' }}</p>
+                            @if ($item->wadek1_verified_at)
+                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->wadek1_verified_at->translatedFormat('d F Y H:i') }}</p>
+                            @endif
+                        </div>
+                        <div class="note-box">
+                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
+                                Dekan — {{ $item->formatRoleStatus($item->dekan_status) }}
+                            </p>
+                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->dekan_catatan ?: 'Belum ada catatan' }}</p>
+                            @if ($item->dekan_verified_at)
+                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->dekan_verified_at->translatedFormat('d F Y H:i') }}</p>
+                            @endif
+                        </div>
+                    </article>
+                @empty
+                    <div class="card" style="color:var(--muted);">
+                        Belum ada permohonan SK Penguji untuk mahasiswa ini.
+                        @if ($bisaAjukanPenguji)
+                            <p style="margin:.65rem 0 0;">
+                                SK Pembimbing sudah terbit.
+                                <a href="{{ route('penguji.create') }}" style="color:var(--forest);font-weight:700;">Ajukan SK Penguji</a>
+                            </p>
+                        @endif
                     </div>
                 @endforelse
             @endif

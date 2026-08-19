@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\ProgramStudi;
 use App\Enums\StatusPermohonan;
 use App\Filament\Resources\PermohonanPembimbingResource\Pages;
+use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PermohonanPembimbing;
 use Filament\Forms;
@@ -54,46 +55,73 @@ class PermohonanPembimbingResource extends Resource
                                         return (new Unique('mahasiswas', 'nim'))
                                             ->ignore($record?->getKey(), 'nim');
                                     })
+                                    ->validationMessages([
+                                        'required' => 'NIM wajib diisi.',
+                                    ])
                                     ->helperText('Akademik dapat memperbaiki NIM. Perubahan berlaku untuk seluruh data mahasiswa ini.'),
                                 Forms\Components\TextInput::make('nama_lengkap')
                                     ->label('Nama Lengkap')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->validationMessages([
+                                        'required' => 'Nama lengkap wajib diisi.',
+                                    ]),
                                 Forms\Components\TextInput::make('tempat_lahir')
                                     ->label('Tempat Lahir')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->validationMessages([
+                                        'required' => 'Tempat lahir wajib diisi.',
+                                    ]),
                                 Forms\Components\DatePicker::make('tanggal_lahir')
                                     ->label('Tanggal Lahir')
                                     ->required()
                                     ->native(false)
-                                    ->displayFormat('d/m/Y'),
+                                    ->displayFormat('d/m/Y')
+                                    ->validationMessages([
+                                        'required' => 'Tanggal lahir wajib diisi.',
+                                    ]),
                                 Forms\Components\Textarea::make('alamat_lengkap')
                                     ->label('Alamat Lengkap')
                                     ->required()
                                     ->columnSpanFull()
-                                    ->rows(3),
+                                    ->rows(3)
+                                    ->validationMessages([
+                                        'required' => 'Alamat lengkap wajib diisi.',
+                                    ]),
                                 Forms\Components\TextInput::make('no_hp')
                                     ->label('No. HP')
                                     ->required()
-                                    ->maxLength(20),
+                                    ->maxLength(20)
+                                    ->validationMessages([
+                                        'required' => 'Nomor HP wajib diisi.',
+                                    ]),
                                 Forms\Components\TextInput::make('email')
                                     ->label('Email')
                                     ->email()
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->validationMessages([
+                                        'required' => 'Email wajib diisi.',
+                                    ]),
                                 Forms\Components\Select::make('program_studi')
                                     ->label('Program Studi')
                                     ->options(ProgramStudi::options())
                                     ->required()
-                                    ->native(false),
+                                    ->native(false)
+                                    ->validationMessages([
+                                        'required' => 'Program studi wajib dipilih.',
+                                    ]),
                             ]),
                         Forms\Components\TextInput::make('semester')
                             ->label('Semester')
                             ->numeric()
                             ->required()
                             ->minValue(1)
-                            ->maxValue(14),
+                            ->maxValue(14)
+                            ->validationMessages([
+                                'required' => 'Semester wajib diisi.',
+                            ]),
                     ]),
 
                 Forms\Components\Section::make('Skripsi & Pembimbing')
@@ -103,23 +131,52 @@ class PermohonanPembimbingResource extends Resource
                             ->label('Judul Skripsi')
                             ->required()
                             ->columnSpanFull()
-                            ->rows(2),
-                        Forms\Components\TextInput::make('pembimbing_1')
+                            ->rows(2)
+                            ->validationMessages([
+                                'required' => 'Judul skripsi wajib diisi.',
+                            ]),
+                        Forms\Components\Select::make('pembimbing_1')
                             ->label('Pembimbing 1')
+                            ->options(fn (?PermohonanPembimbing $record): array => Dosen::optionsForSelect(
+                                $record?->pembimbing_1,
+                                $record?->pembimbing_2,
+                            ))
+                            ->searchable()
                             ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('pembimbing_2')
+                            ->live()
+                            ->different('pembimbing_2')
+                            ->validationMessages([
+                                'required' => 'Pembimbing 1 wajib dipilih.',
+                                'different' => 'Pembimbing 1 dan Pembimbing 2 tidak boleh sama.',
+                            ]),
+                        Forms\Components\Select::make('pembimbing_2')
                             ->label('Pembimbing 2')
+                            ->options(fn (?PermohonanPembimbing $record): array => Dosen::optionsForSelect(
+                                $record?->pembimbing_1,
+                                $record?->pembimbing_2,
+                            ))
+                            ->searchable()
                             ->required()
-                            ->maxLength(255),
+                            ->live()
+                            ->different('pembimbing_1')
+                            ->validationMessages([
+                                'required' => 'Pembimbing 2 wajib dipilih.',
+                                'different' => 'Pembimbing 1 dan Pembimbing 2 tidak boleh sama.',
+                            ]),
                         Forms\Components\FileUpload::make('file_usul_pembimbing')
                             ->label('File Usul Pembimbing dari Prodi')
+                            ->helperText('Wajib diunggah. Format PDF / JPG / PNG.')
                             ->disk('public')
                             ->directory('usul-pembimbing')
                             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                             ->downloadable()
                             ->openable()
                             ->required()
+                            ->minFiles(1)
+                            ->validationMessages([
+                                'required' => 'File usul pembimbing dari Prodi wajib diunggah.',
+                                'min' => 'File usul pembimbing dari Prodi wajib diunggah.',
+                            ])
                             ->columnSpanFull(),
                     ]),
 
