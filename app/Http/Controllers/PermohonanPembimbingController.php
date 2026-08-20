@@ -65,14 +65,12 @@ class PermohonanPembimbingController extends Controller
 
             $mahasiswa = Mahasiswa::query()
                 ->with([
-                    'permohonanPembimbing' => fn ($q) => $q
-                        ->with(['akademikVerifier', 'kabagVerifier', 'wadek1Verifier', 'dekanVerifier'])
-                        ->latest(),
-                    'permohonanPenguji' => fn ($q) => $q
-                        ->with(['akademikVerifier', 'kabagVerifier', 'wadek1Verifier', 'dekanVerifier', 'permohonanPembimbing'])
-                        ->latest(),
+                    'permohonanPembimbing' => fn ($q) => $q->latest(),
+                    'permohonanPenguji' => fn ($q) => $q->latest(),
                     'undanganMunaqasyah' => fn ($q) => $q->latest(),
                     'pembimbingTerbitTerakhir',
+                    'pengujiTerbitTerakhir',
+                    'judulSkripsiAktif',
                 ])
                 ->find($nim);
 

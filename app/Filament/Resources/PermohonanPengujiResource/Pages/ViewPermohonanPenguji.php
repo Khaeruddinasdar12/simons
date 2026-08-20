@@ -4,7 +4,9 @@ namespace App\Filament\Resources\PermohonanPengujiResource\Pages;
 
 use App\Enums\StatusPermohonan;
 use App\Filament\Resources\PermohonanPengujiResource;
+use App\Filament\Support\HapusPermohonanUi;
 use App\Models\PermohonanPenguji;
+use App\Services\HapusPermohonanService;
 use App\Services\SkPengujiMailService;
 use Filament\Actions;
 use Filament\Forms;
@@ -38,7 +40,14 @@ class ViewPermohonanPenguji extends ViewRecord
                 Infolists\Components\Section::make('Skripsi & Penguji')
                     ->columns(2)
                     ->schema([
-                        Infolists\Components\TextEntry::make('judul_skripsi')->label('Judul Skripsi')->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('judul_skripsi')
+                            ->label('Judul Skripsi')
+                            ->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('judul_terkini')
+                            ->label('Judul untuk permohonan berikutnya')
+                            ->state(fn (PermohonanPenguji $record): string => $record->judulTerkini())
+                            ->visible(fn (PermohonanPenguji $record): bool => $record->judul_skripsi !== $record->judulTerkini())
+                            ->columnSpanFull(),
                         Infolists\Components\TextEntry::make('penguji_1')->label('Penguji 1'),
                         Infolists\Components\TextEntry::make('penguji_2')->label('Penguji 2'),
                         Infolists\Components\TextEntry::make('permohonanPembimbing.nomor_sk')
@@ -524,6 +533,36 @@ class ViewPermohonanPenguji extends ViewRecord
                         ->title('Dikembalikan ke akademik oleh Dekan')
                         ->warning()
                         ->send();
+                }),
+
+            Actions\DeleteAction::make()
+                ->label('Hapus permohonan')
+                ->modalHeading('Hapus permohonan SK Penguji')
+                ->modalDescription(HapusPermohonanUi::deskripsiHapusPenguji())
+                ->successNotificationTitle('Permohonan SK Penguji dihapus')
+                ->successRedirectUrl(PermohonanPengujiResource::getUrl('index'))
+                ->using(function (PermohonanPenguji $record): void {
+                    app(HapusPermohonanService::class)->hapusPenguji($record);
+                }),
+
+            Actions\Action::make('hapusDataNim')
+                ->label('Hapus seluruh data NIM')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->visible(fn (): bool => $user->can('hapusDataNim', $this->getRecord()))
+                ->requiresConfirmation()
+                ->modalHeading('Hapus seluruh data mahasiswa')
+                ->modalDescription(fn (): string => HapusPermohonanUi::deskripsiHapusNim(
+                    (string) $this->getRecord()->mahasiswa_nim,
+                    $this->getRecord()->mahasiswa?->nama_lengkap,
+                ))
+                ->form(fn (): array => [
+                    HapusPermohonanUi::fieldKonfirmasiNim((string) $this->getRecord()->mahasiswa_nim),
+                ])
+                ->action(function (): void {
+                    $nim = (string) $this->getRecord()->mahasiswa_nim;
+                    HapusPermohonanUi::hapusDataNim($nim);
+                    $this->redirect(PermohonanPengujiResource::getUrl('index'));
                 }),
         ];
     }

@@ -50,7 +50,7 @@
         <div class="row"><div class="label">Nomor SK</div>{{ $permohonan->nomor_sk }}</div>
         <div class="row"><div class="label">Tanggal SK</div>{{ $permohonan->tanggal_sk?->translatedFormat('d F Y') }}</div>
         <div class="row"><div class="label">Mahasiswa</div>{{ $permohonan->mahasiswa->nama_lengkap }} ({{ $permohonan->mahasiswa->nim }})</div>
-        <div class="row"><div class="label">Program Studi</div>{{ $permohonan->mahasiswa->program_studi?->value }}</div>
+        <div class="row"><div class="label">Program Studi</div>{{ $permohonan->mahasiswa->program_studi?->getLabel() }}</div>
         <div class="row"><div class="label">Penguji 1</div>{{ $permohonan->penguji_1 }}</div>
         <div class="row"><div class="label">Penguji 2</div>{{ $permohonan->penguji_2 }}</div>
         <div class="row"><div class="label">Penandatangan</div>{{ $config['penandatangan']['nama'] }} — {{ $config['penandatangan']['jabatan'] }}</div>

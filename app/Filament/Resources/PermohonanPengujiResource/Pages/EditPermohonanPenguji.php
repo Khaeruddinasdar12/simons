@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\PermohonanPengujiResource\Pages;
 
 use App\Filament\Resources\PermohonanPengujiResource;
+use App\Filament\Support\HapusPermohonanUi;
+use App\Models\PermohonanPenguji;
+use App\Services\HapusPermohonanService;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -13,8 +16,38 @@ class EditPermohonanPenguji extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $record = $this->getRecord();
+
         return [
             Actions\ViewAction::make(),
+            Actions\DeleteAction::make()
+                ->label('Hapus permohonan')
+                ->modalHeading('Hapus permohonan SK Penguji')
+                ->modalDescription(HapusPermohonanUi::deskripsiHapusPenguji())
+                ->successNotificationTitle('Permohonan SK Penguji dihapus')
+                ->successRedirectUrl(PermohonanPengujiResource::getUrl('index'))
+                ->using(function (PermohonanPenguji $record): void {
+                    app(HapusPermohonanService::class)->hapusPenguji($record);
+                }),
+            Actions\Action::make('hapusDataNim')
+                ->label('Hapus seluruh data NIM')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->visible(fn (): bool => auth()->user()?->can('hapusDataNim', $record) ?? false)
+                ->requiresConfirmation()
+                ->modalHeading('Hapus seluruh data mahasiswa')
+                ->modalDescription(fn (): string => HapusPermohonanUi::deskripsiHapusNim(
+                    (string) $this->getRecord()->mahasiswa_nim,
+                    $this->getRecord()->mahasiswa?->nama_lengkap,
+                ))
+                ->form(fn (): array => [
+                    HapusPermohonanUi::fieldKonfirmasiNim((string) $this->getRecord()->mahasiswa_nim),
+                ])
+                ->action(function (): void {
+                    $nim = (string) $this->getRecord()->mahasiswa_nim;
+                    HapusPermohonanUi::hapusDataNim($nim);
+                    $this->redirect(PermohonanPengujiResource::getUrl('index'));
+                }),
         ];
     }
 

@@ -69,6 +69,11 @@ class PermohonanPenguji extends Model
         return $this->belongsTo(PermohonanPembimbing::class, 'permohonan_pembimbing_id');
     }
 
+    public function judulTerkini(): string
+    {
+        return $this->mahasiswa?->judulTerkini() ?: (string) $this->judul_skripsi;
+    }
+
     public function penguji1Dosen(): BelongsTo
     {
         return $this->belongsTo(Dosen::class, 'penguji_1_dosen_id');

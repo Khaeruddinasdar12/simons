@@ -3,8 +3,12 @@
 namespace App\Filament\Resources\PermohonanPembimbingResource\Pages;
 
 use App\Enums\StatusPermohonan;
+use App\Enums\SumberJudulSkripsi;
 use App\Filament\Resources\PermohonanPembimbingResource;
+use App\Filament\Support\HapusPermohonanUi;
 use App\Models\PermohonanPembimbing;
+use App\Models\User;
+use App\Services\HapusPermohonanService;
 use App\Services\SkPembimbingMailService;
 use Filament\Actions;
 use Filament\Forms;
@@ -12,11 +16,20 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class ViewPermohonanPembimbing extends ViewRecord
 {
     protected static string $resource = PermohonanPembimbingResource::class;
+
+    protected function resolveRecord(int|string $key): Model
+    {
+        return parent::resolveRecord($key)->load([
+            'mahasiswa.judulSkripsiAktif',
+            'riwayatJudul.diubahOleh',
+        ]);
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {
@@ -38,7 +51,15 @@ class ViewPermohonanPembimbing extends ViewRecord
                 Infolists\Components\Section::make('Skripsi & Pembimbing')
                     ->columns(2)
                     ->schema([
-                        Infolists\Components\TextEntry::make('judul_skripsi')->label('Judul Skripsi')->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('judul_skripsi')
+                            ->label('Judul pada SK Pembimbing')
+                            ->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('judul_terkini')
+                            ->label('Judul untuk permohonan berikutnya')
+                            ->state(fn (PermohonanPembimbing $record): string => $record->judulTerkini())
+                            ->helperText('Dipakai saat pengajuan SK Penguji atau undangan munaqasyah. Tidak mengubah SK Pembimbing yang sudah terbit.')
+                            ->visible(fn (PermohonanPembimbing $record): bool => $record->judul_skripsi !== $record->judulTerkini())
+                            ->columnSpanFull(),
                         Infolists\Components\TextEntry::make('pembimbing_1')->label('Pembimbing 1'),
                         Infolists\Components\TextEntry::make('pembimbing_2')->label('Pembimbing 2'),
                         Infolists\Components\TextEntry::make('file_usul_pembimbing')
@@ -46,6 +67,40 @@ class ViewPermohonanPembimbing extends ViewRecord
                             ->formatStateUsing(fn (?string $state): string => $state ? 'Lihat berkas' : '-')
                             ->url(fn (PermohonanPembimbing $record): ?string => $record->file_usul_url, true)
                             ->columnSpanFull(),
+                    ]),
+
+                Infolists\Components\Section::make('Riwayat Judul Skripsi')
+                    ->description('Setiap perubahan judul dicatat beserta waktu dan petugas. Judul aktif dipakai permohonan SK Penguji dan undangan munaqasyah berikutnya.')
+                    ->visible(fn (PermohonanPembimbing $record): bool => $record->riwayatJudul->isNotEmpty())
+                    ->schema([
+                        Infolists\Components\RepeatableEntry::make('riwayatJudul')
+                            ->hiddenLabel()
+                            ->schema([
+                                Infolists\Components\TextEntry::make('judul')
+                                    ->hiddenLabel()
+                                    ->columnSpanFull(),
+                                Infolists\Components\TextEntry::make('is_aktif')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->formatStateUsing(fn (mixed $state): string => $state ? 'Aktif' : 'Riwayat')
+                                    ->color(fn (mixed $state): string => $state ? 'success' : 'gray'),
+                                Infolists\Components\TextEntry::make('sumber')
+                                    ->label('Sumber')
+                                    ->formatStateUsing(fn ($state): string => $state instanceof SumberJudulSkripsi
+                                        ? $state->label()
+                                        : (SumberJudulSkripsi::tryFrom((string) $state)?->label() ?? '-')),
+                                Infolists\Components\TextEntry::make('diubahOleh.name')
+                                    ->label('Dicatat oleh')
+                                    ->placeholder('Mahasiswa (pengajuan)'),
+                                Infolists\Components\TextEntry::make('created_at')
+                                    ->label('Waktu dicatat')
+                                    ->dateTime('d/m/Y H:i:s'),
+                                Infolists\Components\TextEntry::make('catatan')
+                                    ->label('Catatan')
+                                    ->placeholder('-')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(4),
                     ]),
 
                 Infolists\Components\Section::make('Status Permohonan')
@@ -202,6 +257,43 @@ class ViewPermohonanPembimbing extends ViewRecord
 
             Actions\EditAction::make()
                 ->visible(fn (): bool => $user->can('update', $this->getRecord())),
+
+            Actions\Action::make('ubahJudul')
+                ->label('Ubah Judul Skripsi')
+                ->icon('heroicon-o-pencil-square')
+                ->color('warning')
+                ->visible(fn (): bool => $user->can('ubahJudul', $this->getRecord()))
+                ->fillForm(fn (): array => [
+                    'judul' => $this->getRecord()->judulTerkini(),
+                ])
+                ->form(PermohonanPembimbingResource::ubahJudulFormSchema())
+                ->modalHeading('Ubah Judul Skripsi')
+                ->modalDescription('Judul lama tetap tersimpan sebagai riwayat. SK Pembimbing yang sudah terbit tidak digenerate ulang. Judul baru dipakai untuk permohonan SK Penguji atau undangan munaqasyah berikutnya.')
+                ->modalSubmitActionLabel('Simpan Judul')
+                ->action(function (array $data) use ($user): void {
+                    if (! $user instanceof User) {
+                        return;
+                    }
+
+                    PermohonanPembimbingResource::simpanUbahJudul($this->getRecord(), $data, $user);
+                    $this->refreshRecord();
+                }),
+
+            Actions\Action::make('generateUlangSk')
+                ->label('Generate Ulang SK')
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->visible(fn (): bool => $user->can('generateUlangSk', $this->getRecord()))
+                ->fillForm(fn (): array => PermohonanPembimbingResource::generateUlangSkFillForm($this->getRecord()))
+                ->form(PermohonanPembimbingResource::generateUlangSkFormSchema())
+                ->modalHeading('Generate Ulang SK Pembimbing')
+                ->modalDescription('Semua isian dapat diubah. Nomor SK dan tanggal penetapan tidak berubah. PDF SK akan dibuat ulang dari data ini.')
+                ->modalWidth('7xl')
+                ->modalSubmitActionLabel('Simpan & Generate Ulang SK')
+                ->action(function (array $data): void {
+                    PermohonanPembimbingResource::prosesGenerateUlangSk($this->getRecord(), $data);
+                    $this->refreshRecord();
+                }),
 
             Actions\Action::make('kirimPimpinan')
                 ->label('Kirim ke Kabag, Wadek 1 & Dekan')
@@ -522,13 +614,44 @@ class ViewPermohonanPembimbing extends ViewRecord
                         ->warning()
                         ->send();
                 }),
+
+            Actions\DeleteAction::make()
+                ->label('Hapus permohonan')
+                ->modalHeading('Hapus permohonan SK Pembimbing')
+                ->modalDescription(fn (): string => HapusPermohonanUi::deskripsiHapusPembimbing($this->getRecord()))
+                ->successNotificationTitle('Permohonan SK Pembimbing dihapus')
+                ->successRedirectUrl(PermohonanPembimbingResource::getUrl('index'))
+                ->using(function (PermohonanPembimbing $record): void {
+                    app(HapusPermohonanService::class)->hapusPembimbing($record);
+                }),
+
+            Actions\Action::make('hapusDataNim')
+                ->label('Hapus seluruh data NIM')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->visible(fn (): bool => $user->can('hapusDataNim', $this->getRecord()))
+                ->requiresConfirmation()
+                ->modalHeading('Hapus seluruh data mahasiswa')
+                ->modalDescription(fn (): string => HapusPermohonanUi::deskripsiHapusNim(
+                    (string) $this->getRecord()->mahasiswa_nim,
+                    $this->getRecord()->mahasiswa?->nama_lengkap,
+                ))
+                ->form(fn (): array => [
+                    HapusPermohonanUi::fieldKonfirmasiNim((string) $this->getRecord()->mahasiswa_nim),
+                ])
+                ->action(function (): void {
+                    $nim = (string) $this->getRecord()->mahasiswa_nim;
+                    HapusPermohonanUi::hapusDataNim($nim);
+                    $this->redirect(PermohonanPembimbingResource::getUrl('index'));
+                }),
         ];
     }
 
     protected function refreshRecord(): void
     {
         $this->record = $this->getRecord()->fresh([
-            'mahasiswa',
+            'mahasiswa.judulSkripsiAktif',
+            'riwayatJudul.diubahOleh',
             'akademikVerifier',
             'kabagVerifier',
             'wadek1Verifier',

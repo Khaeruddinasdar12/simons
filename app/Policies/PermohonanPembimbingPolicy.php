@@ -34,8 +34,17 @@ class PermohonanPembimbingPolicy
 
     public function delete(User $user, PermohonanPembimbing $record): bool
     {
-        return $user->isSuperadmin()
-            && $record->status === StatusPermohonan::Diajukan;
+        return $user->isSuperadmin();
+    }
+
+    public function deleteAny(User $user): bool
+    {
+        return $user->isSuperadmin();
+    }
+
+    public function hapusDataNim(User $user, PermohonanPembimbing $record): bool
+    {
+        return $user->isSuperadmin();
     }
 
     public function sendToPimpinan(User $user, PermohonanPembimbing $record): bool
@@ -70,5 +79,18 @@ class PermohonanPembimbingPolicy
     public function previewSk(User $user, PermohonanPembimbing $record): bool
     {
         return $user->role !== null;
+    }
+
+    public function ubahJudul(User $user, PermohonanPembimbing $record): bool
+    {
+        return $user->isAkademik()
+            && $record->status === StatusPermohonan::SkTerbit;
+    }
+
+    public function generateUlangSk(User $user, PermohonanPembimbing $record): bool
+    {
+        return $user->isAkademik()
+            && $record->status === StatusPermohonan::SkTerbit
+            && filled($record->file_sk);
     }
 }

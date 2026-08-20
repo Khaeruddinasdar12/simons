@@ -8,8 +8,14 @@ use App\Filament\Resources\PermohonanPembimbingResource\Pages;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PermohonanPembimbing;
+use App\Models\User;
+use App\Filament\Support\HapusPermohonanUi;
+use App\Services\HapusPermohonanService;
+use App\Services\JudulSkripsiService;
+use App\Services\SkPembimbingGenerator;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -128,10 +134,11 @@ class PermohonanPembimbingResource extends Resource
                     ->columns(2)
                     ->schema([
                         Forms\Components\Textarea::make('judul_skripsi')
-                            ->label('Judul Skripsi')
+                            ->label('Judul Skripsi (pada SK Pembimbing)')
                             ->required()
                             ->columnSpanFull()
                             ->rows(2)
+                            ->helperText('Judul yang tercantum di SK Pembimbing. Untuk judul permohonan berikutnya tanpa mengubah SK, gunakan tombol Ubah Judul.')
                             ->validationMessages([
                                 'required' => 'Judul skripsi wajib diisi.',
                             ]),
@@ -224,7 +231,8 @@ class PermohonanPembimbingResource extends Resource
                 Tables\Columns\TextColumn::make('judul_skripsi')
                     ->label('Judul')
                     ->limit(40)
-                    ->tooltip(fn (PermohonanPembimbing $record): string => $record->judul_skripsi)
+                    ->state(fn (PermohonanPembimbing $record): string => $record->judulTerkini())
+                    ->tooltip(fn (PermohonanPembimbing $record): string => $record->judulTerkini())
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -305,8 +313,67 @@ class PermohonanPembimbingResource extends Resource
                     ->url(fn (PermohonanPembimbing $record): string => route('sk.preview', $record))
                     ->openUrlInNewTab()
                     ->visible(fn (PermohonanPembimbing $record): bool => auth()->user()?->can('previewSk', $record) ?? false),
+                Tables\Actions\Action::make('ubahJudul')
+                    ->label('Ubah Judul')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
+                    ->visible(fn (PermohonanPembimbing $record): bool => auth()->user()?->can('ubahJudul', $record) ?? false)
+                    ->fillForm(fn (PermohonanPembimbing $record): array => [
+                        'judul' => $record->judulTerkini(),
+                    ])
+                    ->form(self::ubahJudulFormSchema())
+                    ->modalHeading('Ubah Judul Skripsi')
+                    ->modalDescription('Judul lama tetap tersimpan sebagai riwayat. SK Pembimbing yang sudah terbit tidak digenerate ulang. Judul baru dipakai untuk permohonan SK Penguji atau undangan munaqasyah berikutnya.')
+                    ->modalSubmitActionLabel('Simpan Judul')
+                    ->action(function (PermohonanPembimbing $record, array $data): void {
+                        $user = Auth::user();
+                        if (! $user instanceof User) {
+                            return;
+                        }
+
+                        self::simpanUbahJudul($record, $data, $user);
+                    }),
+                Tables\Actions\Action::make('generateUlangSk')
+                    ->label('Generate Ulang SK')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('gray')
+                    ->visible(fn (PermohonanPembimbing $record): bool => auth()->user()?->can('generateUlangSk', $record) ?? false)
+                    ->fillForm(fn (PermohonanPembimbing $record): array => self::generateUlangSkFillForm($record))
+                    ->form(self::generateUlangSkFormSchema())
+                    ->modalHeading('Generate Ulang SK Pembimbing')
+                    ->modalDescription('Semua isian dapat diubah. Nomor SK dan tanggal penetapan tidak berubah. PDF SK akan dibuat ulang dari data ini.')
+                    ->modalWidth('7xl')
+                    ->modalSubmitActionLabel('Simpan & Generate Ulang SK')
+                    ->action(function (PermohonanPembimbing $record, array $data): void {
+                        self::prosesGenerateUlangSk($record, $data);
+                    }),
                 Tables\Actions\EditAction::make()
                     ->visible(fn (PermohonanPembimbing $record): bool => auth()->user()?->can('update', $record) ?? false),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus permohonan')
+                    ->modalHeading('Hapus permohonan SK Pembimbing')
+                    ->modalDescription(fn (PermohonanPembimbing $record): string => HapusPermohonanUi::deskripsiHapusPembimbing($record))
+                    ->successNotificationTitle('Permohonan SK Pembimbing dihapus')
+                    ->using(function (PermohonanPembimbing $record): void {
+                        app(HapusPermohonanService::class)->hapusPembimbing($record);
+                    }),
+                Tables\Actions\Action::make('hapusDataNim')
+                    ->label('Hapus seluruh data NIM')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->visible(fn (PermohonanPembimbing $record): bool => auth()->user()?->can('hapusDataNim', $record) ?? false)
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus seluruh data mahasiswa')
+                    ->modalDescription(fn (PermohonanPembimbing $record): string => HapusPermohonanUi::deskripsiHapusNim(
+                        (string) $record->mahasiswa_nim,
+                        $record->mahasiswa?->nama_lengkap,
+                    ))
+                    ->form(fn (PermohonanPembimbing $record): array => [
+                        HapusPermohonanUi::fieldKonfirmasiNim((string) $record->mahasiswa_nim),
+                    ])
+                    ->action(function (PermohonanPembimbing $record): void {
+                        HapusPermohonanUi::hapusDataNim((string) $record->mahasiswa_nim);
+                    }),
                 Tables\Actions\Action::make('setujuiKabag')
                     ->label('Setujui')
                     ->icon('heroicon-o-check')
@@ -355,6 +422,20 @@ class PermohonanPembimbingResource extends Resource
                     }),
             ])
             ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make()
+                    ->label('Hapus permohonan terpilih')
+                    ->modalHeading('Hapus permohonan terpilih')
+                    ->modalDescription('Permohonan SK Pembimbing yang dipilih akan dihapus permanen, termasuk berkas dan permohonan SK Penguji yang terhubung.')
+                    ->successNotificationTitle('Permohonan terpilih dihapus')
+                    ->action(function (Collection $records): void {
+                        $service = app(HapusPermohonanService::class);
+
+                        foreach ($records as $record) {
+                            if ($record instanceof PermohonanPembimbing) {
+                                $service->hapusPembimbing($record);
+                            }
+                        }
+                    }),
                 Tables\Actions\BulkAction::make('setujuiKabagMassal')
                     ->label('Setujui Kabag')
                     ->icon('heroicon-o-check-circle')
@@ -474,11 +555,256 @@ class PermohonanPembimbingResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with([
-            'mahasiswa',
+            'mahasiswa.judulSkripsiAktif',
             'akademikVerifier',
             'kabagVerifier',
             'wadek1Verifier',
             'dekanVerifier',
         ]);
+    }
+
+    /**
+     * @return array<int, Forms\Components\Component>
+     */
+    public static function ubahJudulFormSchema(): array
+    {
+        return [
+            Forms\Components\Textarea::make('judul')
+                ->label('Judul skripsi untuk permohonan berikutnya')
+                ->required()
+                ->maxLength(500)
+                ->rows(3)
+                ->helperText('Tidak mengubah PDF SK Pembimbing yang sudah terbit. Dipakai saat pengajuan SK Penguji atau undangan munaqasyah.')
+                ->validationMessages([
+                    'required' => 'Judul skripsi wajib diisi.',
+                    'max' => 'Judul skripsi maksimal 500 karakter.',
+                ]),
+            Forms\Components\Textarea::make('catatan')
+                ->label('Catatan perubahan')
+                ->helperText('Opsional. Contoh: perbaikan ejaan, perubahan fokus penelitian, atau sesuai usulan pembimbing.')
+                ->rows(2)
+                ->maxLength(1000),
+        ];
+    }
+
+    /**
+     * @param  array{judul: string, catatan?: string|null}  $data
+     */
+    public static function simpanUbahJudul(PermohonanPembimbing $record, array $data, User $user): void
+    {
+        app(JudulSkripsiService::class)->ubah(
+            $record,
+            (string) $data['judul'],
+            $user,
+            $data['catatan'] ?? null,
+        );
+
+        Notification::make()
+            ->title('Judul skripsi diperbarui')
+            ->body('Perubahan tercatat di riwayat. SK Pembimbing tidak digenerate ulang. Permohonan berikutnya memakai judul terbaru.')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function generateUlangSkFillForm(PermohonanPembimbing $record): array
+    {
+        $record->loadMissing('mahasiswa');
+        $mahasiswa = $record->mahasiswa;
+
+        return [
+            'nomor_sk' => $record->nomor_sk,
+            'tanggal_sk' => $record->tanggal_sk,
+            'mahasiswa' => [
+                'nim' => $mahasiswa?->nim,
+                'nama_lengkap' => $mahasiswa?->nama_lengkap,
+                'tempat_lahir' => $mahasiswa?->tempat_lahir,
+                'tanggal_lahir' => $mahasiswa?->tanggal_lahir,
+                'alamat_lengkap' => $mahasiswa?->alamat_lengkap,
+                'no_hp' => $mahasiswa?->no_hp,
+                'email' => $mahasiswa?->email,
+                'program_studi' => $mahasiswa?->program_studi?->value,
+            ],
+            'semester' => $record->semester,
+            'judul_skripsi' => $record->judul_skripsi,
+            'pembimbing_1' => $record->pembimbing_1,
+            'pembimbing_2' => $record->pembimbing_2,
+            'file_usul_pembimbing' => $record->file_usul_pembimbing,
+        ];
+    }
+
+    /**
+     * @return array<int, Forms\Components\Component>
+     */
+    public static function generateUlangSkFormSchema(): array
+    {
+        return [
+            Forms\Components\Section::make('Identitas SK')
+                ->description('Nomor SK dan tanggal penetapan tidak diubah.')
+                ->columns(2)
+                ->schema([
+                    Forms\Components\TextInput::make('nomor_sk')
+                        ->label('Nomor SK')
+                        ->disabled()
+                        ->dehydrated(false),
+                    Forms\Components\DatePicker::make('tanggal_sk')
+                        ->label('Tanggal Penetapan')
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->native(false)
+                        ->displayFormat('d/m/Y'),
+                ]),
+            Forms\Components\Section::make('Data Mahasiswa')
+                ->columns(2)
+                ->schema([
+                    Forms\Components\TextInput::make('mahasiswa.nim')
+                        ->label('NIM')
+                        ->required()
+                        ->maxLength(30)
+                        ->rule(function (Get $get, ?PermohonanPembimbing $record): Unique {
+                            $nim = $record?->mahasiswa_nim ?? $get('mahasiswa.nim');
+
+                            return (new Unique('mahasiswas', 'nim'))
+                                ->ignore($nim, 'nim');
+                        })
+                        ->validationMessages([
+                            'required' => 'NIM wajib diisi.',
+                        ]),
+                    Forms\Components\TextInput::make('mahasiswa.nama_lengkap')
+                        ->label('Nama Lengkap')
+                        ->required()
+                        ->maxLength(255)
+                        ->validationMessages([
+                            'required' => 'Nama lengkap wajib diisi.',
+                        ]),
+                    Forms\Components\TextInput::make('mahasiswa.tempat_lahir')
+                        ->label('Tempat Lahir')
+                        ->required()
+                        ->maxLength(255)
+                        ->validationMessages([
+                            'required' => 'Tempat lahir wajib diisi.',
+                        ]),
+                    Forms\Components\DatePicker::make('mahasiswa.tanggal_lahir')
+                        ->label('Tanggal Lahir')
+                        ->required()
+                        ->native(false)
+                        ->displayFormat('d/m/Y')
+                        ->validationMessages([
+                            'required' => 'Tanggal lahir wajib diisi.',
+                        ]),
+                    Forms\Components\Textarea::make('mahasiswa.alamat_lengkap')
+                        ->label('Alamat Lengkap')
+                        ->required()
+                        ->columnSpanFull()
+                        ->rows(3)
+                        ->validationMessages([
+                            'required' => 'Alamat lengkap wajib diisi.',
+                        ]),
+                    Forms\Components\TextInput::make('mahasiswa.no_hp')
+                        ->label('No. HP')
+                        ->required()
+                        ->maxLength(20)
+                        ->validationMessages([
+                            'required' => 'Nomor HP wajib diisi.',
+                        ]),
+                    Forms\Components\TextInput::make('mahasiswa.email')
+                        ->label('Email')
+                        ->email()
+                        ->required()
+                        ->maxLength(255)
+                        ->validationMessages([
+                            'required' => 'Email wajib diisi.',
+                        ]),
+                    Forms\Components\Select::make('mahasiswa.program_studi')
+                        ->label('Program Studi')
+                        ->options(ProgramStudi::options())
+                        ->required()
+                        ->native(false)
+                        ->validationMessages([
+                            'required' => 'Program studi wajib dipilih.',
+                        ]),
+                    Forms\Components\TextInput::make('semester')
+                        ->label('Semester')
+                        ->numeric()
+                        ->required()
+                        ->minValue(1)
+                        ->maxValue(14)
+                        ->validationMessages([
+                            'required' => 'Semester wajib diisi.',
+                        ]),
+                ]),
+            Forms\Components\Section::make('Skripsi & Pembimbing')
+                ->columns(2)
+                ->schema([
+                    Forms\Components\Textarea::make('judul_skripsi')
+                        ->label('Judul Skripsi')
+                        ->required()
+                        ->columnSpanFull()
+                        ->rows(2)
+                        ->helperText('Judul yang tercantum di SK Pembimbing. Untuk judul permohonan berikutnya tanpa mengubah SK, gunakan tombol Ubah Judul.')
+                        ->validationMessages([
+                            'required' => 'Judul skripsi wajib diisi.',
+                        ]),
+                    Forms\Components\Select::make('pembimbing_1')
+                        ->label('Pembimbing 1')
+                        ->options(fn (Get $get, ?PermohonanPembimbing $record): array => Dosen::optionsForSelect(
+                            $get('pembimbing_1') ?? $record?->pembimbing_1,
+                            $get('pembimbing_2') ?? $record?->pembimbing_2,
+                        ))
+                        ->searchable()
+                        ->required()
+                        ->live()
+                        ->different('pembimbing_2')
+                        ->validationMessages([
+                            'required' => 'Pembimbing 1 wajib dipilih.',
+                            'different' => 'Pembimbing 1 dan Pembimbing 2 tidak boleh sama.',
+                        ]),
+                    Forms\Components\Select::make('pembimbing_2')
+                        ->label('Pembimbing 2')
+                        ->options(fn (Get $get, ?PermohonanPembimbing $record): array => Dosen::optionsForSelect(
+                            $get('pembimbing_1') ?? $record?->pembimbing_1,
+                            $get('pembimbing_2') ?? $record?->pembimbing_2,
+                        ))
+                        ->searchable()
+                        ->required()
+                        ->live()
+                        ->different('pembimbing_1')
+                        ->validationMessages([
+                            'required' => 'Pembimbing 2 wajib dipilih.',
+                            'different' => 'Pembimbing 1 dan Pembimbing 2 tidak boleh sama.',
+                        ]),
+                    Forms\Components\FileUpload::make('file_usul_pembimbing')
+                        ->label('File Usul Pembimbing dari Prodi')
+                        ->helperText('Wajib diunggah. Format PDF / JPG / PNG.')
+                        ->disk('public')
+                        ->directory('usul-pembimbing')
+                        ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                        ->downloadable()
+                        ->openable()
+                        ->required()
+                        ->minFiles(1)
+                        ->validationMessages([
+                            'required' => 'File usul pembimbing dari Prodi wajib diunggah.',
+                            'min' => 'File usul pembimbing dari Prodi wajib diunggah.',
+                        ])
+                        ->columnSpanFull(),
+                ]),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function prosesGenerateUlangSk(PermohonanPembimbing $record, array $data): void
+    {
+        app(SkPembimbingGenerator::class)->perbaruiDanGenerateUlang($record, $data);
+
+        Notification::make()
+            ->title('SK Pembimbing digenerate ulang')
+            ->body('Data permohonan disimpan. Nomor SK dan tanggal penetapan tidak berubah. PDF SK telah dibuat ulang.')
+            ->success()
+            ->send();
     }
 }

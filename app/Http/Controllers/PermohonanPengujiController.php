@@ -37,7 +37,7 @@ class PermohonanPengujiController extends Controller
         }
 
         $mahasiswa = Mahasiswa::query()
-            ->with('pembimbingTerbitTerakhir')
+            ->with(['pembimbingTerbitTerakhir', 'judulSkripsiAktif'])
             ->find($nim);
 
         if (! $mahasiswa) {
@@ -73,9 +73,9 @@ class PermohonanPengujiController extends Controller
                 'alamat_lengkap' => $mahasiswa->alamat_lengkap,
                 'no_hp' => $mahasiswa->no_hp,
                 'email' => $mahasiswa->email,
-                'program_studi' => $mahasiswa->program_studi?->value,
+                'program_studi' => $mahasiswa->program_studi?->getLabel() ?? $mahasiswa->program_studi?->value,
             ],
-            'judul_skripsi' => $skPembimbing->judul_skripsi,
+            'judul_skripsi' => $mahasiswa->judulTerkini() ?: $skPembimbing->judul_skripsi,
             'semester' => $skPembimbing->semester,
             'pembimbing_1' => $skPembimbing->pembimbing_1,
             'pembimbing_2' => $skPembimbing->pembimbing_2,
@@ -101,7 +101,7 @@ class PermohonanPengujiController extends Controller
                 ...$request->permohonanAttributes(),
                 'mahasiswa_nim' => $nim,
                 'permohonan_pembimbing_id' => $skPembimbing->id,
-                'judul_skripsi' => $skPembimbing->judul_skripsi,
+                'judul_skripsi' => $mahasiswa->judulTerkini() ?: $skPembimbing->judul_skripsi,
                 'semester' => $skPembimbing->semester,
                 'file_usul_penguji' => $path,
                 'status' => StatusPermohonan::Diajukan,

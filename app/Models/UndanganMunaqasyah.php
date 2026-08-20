@@ -19,4 +19,9 @@ class UndanganMunaqasyah extends Model
     {
         return $this->belongsTo(Mahasiswa::class, 'mahasiswa_nim', 'nim');
     }
+
+    public function judulTerkini(): ?string
+    {
+        return $this->mahasiswa?->judulTerkini();
+    }
 }

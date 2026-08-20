@@ -21,6 +21,28 @@ enum StatusPermohonan: string
         };
     }
 
+    public function labelPublik(): string
+    {
+        return match ($this) {
+            self::Diajukan => 'Menunggu akademik',
+            self::DikirimPimpinan => 'Sedang diperiksa pimpinan',
+            self::DikembalikanAkademik => 'Dikembalikan',
+            self::Ditolak => 'Ditolak',
+            self::SkTerbit => 'SK terbit',
+        };
+    }
+
+    public function keteranganPublik(): string
+    {
+        return match ($this) {
+            self::Diajukan => 'Permohonan sedang diperiksa akademik.',
+            self::DikirimPimpinan => 'Permohonan sedang diperiksa Kabag, Wadek 1, dan Dekan.',
+            self::DikembalikanAkademik => 'Permohonan dikembalikan ke akademik untuk ditindaklanjuti.',
+            self::Ditolak => 'Permohonan tidak disetujui.',
+            self::SkTerbit => 'SK telah terbit dan dapat diunduh.',
+        };
+    }
+
     public function color(): string
     {
         return match ($this) {

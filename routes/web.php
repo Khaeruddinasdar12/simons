@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [PermohonanPembimbingController::class, 'create'])->name('home');
+Route::view('/', 'permohonan.alur')->name('home');
+
+Route::get('/permohonan-pembimbing', [PermohonanPembimbingController::class, 'create'])
+    ->name('pembimbing.create');
 Route::post('/permohonan-pembimbing', [PermohonanPembimbingController::class, 'store'])
     ->name('permohonan.store');
 

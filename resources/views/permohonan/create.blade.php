@@ -4,323 +4,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name') }} — Usul Pembimbing Skripsi</title>
+    <title>{{ config('app.name') }} — Permohonan SK Pembimbing</title>
     <link rel="icon" href="{{ asset('logoiainbone.png') }}" type="image/png">
     <link rel="shortcut icon" href="{{ asset('logoiainbone.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ asset('logoiainbone.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=fraunces:500,600,700|manrope:400,500,600,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.default.min.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        :root {
-            --ink: #0f241c;
-            --forest: #14532d;
-            --leaf: #166534;
-            --glow: #22c55e;
-            --mist: #ecfdf3;
-            --paper: #f8faf8;
-            --line: rgba(20, 83, 45, 0.14);
-            --muted: rgba(15, 36, 28, 0.68);
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Manrope', sans-serif;
-            color: var(--ink);
-            background:
-                radial-gradient(circle at 12% 8%, rgba(34, 197, 94, 0.16), transparent 32%),
-                radial-gradient(circle at 88% 0%, rgba(20, 83, 45, 0.12), transparent 28%),
-                linear-gradient(165deg, #f4fbf6 0%, var(--paper) 45%, #eef7f1 100%);
-            min-height: 100vh;
-        }
-        .brand-font { font-family: 'Fraunces', Georgia, serif; }
-        .shell { width: min(1120px, calc(100% - 2rem)); margin: 0 auto; }
-        .nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 1.25rem 0;
-            animation: rise .7s ease both;
-        }
-        .logo-pair { display: flex; align-items: center; gap: .85rem; }
-        .logo-pair img { height: 3.4rem; width: auto; object-fit: contain; }
-        .nav-links { display: flex; gap: .75rem; flex-wrap: wrap; }
-        .nav-links a {
-            text-decoration: none;
-            color: var(--forest);
-            font-weight: 600;
-            font-size: .9rem;
-            padding: .55rem .9rem;
-            border-radius: .7rem;
-            transition: background .2s ease, transform .2s ease;
-        }
-        .nav-links a:hover { background: rgba(22, 101, 52, .08); transform: translateY(-1px); }
-        .nav-links a.primary {
-            background: var(--forest);
-            color: #fff;
-        }
-        .hero {
-            display: grid;
-            gap: 1.5rem;
-            padding: 1.5rem 0 2rem;
-            animation: rise .8s .08s ease both;
-        }
-        .hero-panel {
-            position: relative;
-            overflow: hidden;
-            border-radius: 1.75rem;
-            padding: clamp(1.5rem, 4vw, 2.75rem);
-            color: #fff;
-            background:
-                linear-gradient(135deg, rgba(15, 61, 36, .92), rgba(22, 101, 52, .88)),
-                url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40z'/%3E%3C/g%3E%3C/svg%3E");
-            box-shadow: 0 24px 60px rgba(15, 61, 36, .22);
-        }
-        .hero-panel::after {
-            content: '';
-            position: absolute;
-            right: -4rem;
-            bottom: -5rem;
-            width: 18rem;
-            height: 18rem;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(34,197,94,.35), transparent 70%);
-            animation: pulse 5s ease-in-out infinite;
-        }
-        .hero-kicker {
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            font-size: .8rem;
-            font-weight: 700;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            opacity: .9;
-            margin-bottom: .85rem;
-        }
-        .hero h1 {
-            position: relative;
-            z-index: 1;
-            margin: 0;
-            font-family: 'Fraunces', Georgia, serif;
-            font-size: clamp(2.4rem, 6vw, 3.8rem);
-            line-height: 1.08;
-            letter-spacing: .02em;
-        }
-        .hero-expand {
-            position: relative;
-            z-index: 1;
-            margin: .55rem 0 0;
-            max-width: 36rem;
-            font-size: clamp(.95rem, 2.2vw, 1.1rem);
-            font-weight: 600;
-            line-height: 1.45;
-            color: rgba(255,255,255,.95);
-        }
-        .hero p {
-            position: relative;
-            z-index: 1;
-            margin: .85rem 0 0;
-            max-width: 38rem;
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: rgba(255,255,255,.88);
-        }
-        .nav-brand {
-            display: flex;
-            flex-direction: column;
-            gap: .1rem;
-            min-width: 0;
-        }
-        .nav-brand strong {
-            font-family: 'Fraunces', Georgia, serif;
-            font-size: 1.15rem;
-            color: var(--forest);
-            letter-spacing: .03em;
-        }
-        .nav-brand span {
-            font-size: .72rem;
-            color: var(--muted);
-            line-height: 1.3;
-        }
-        .form-shell {
-            margin-bottom: 3rem;
-            border: 1px solid var(--line);
-            background: rgba(255,255,255,.86);
-            backdrop-filter: blur(10px);
-            border-radius: 1.5rem;
-            padding: clamp(1.25rem, 3vw, 2rem);
-            box-shadow: 0 18px 40px rgba(15, 36, 28, .06);
-            animation: rise .85s .16s ease both;
-        }
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: .75rem;
-            margin-bottom: 1.5rem;
-        }
-        .step {
-            border: 1px solid var(--line);
-            border-radius: 1rem;
-            padding: .85rem 1rem;
-            background: #fff;
-        }
-        .step strong {
-            display: block;
-            font-size: .78rem;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            color: var(--leaf);
-        }
-        .step span { font-size: .92rem; color: var(--muted); }
-        .section-title {
-            margin: 0 0 1rem;
-            font-family: 'Fraunces', Georgia, serif;
-            font-size: 1.25rem;
-            color: var(--forest);
-        }
-        .grid { display: grid; gap: 1rem; }
-        @media (min-width: 720px) {
-            .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .logo-pair img { height: 4.2rem; }
-        }
-        .field {
-            width: 100%;
-            border: 1px solid var(--line);
-            background: #fff;
-            border-radius: .8rem;
-            padding: .8rem .95rem;
-            outline: none;
-            font: inherit;
-            transition: border-color .15s, box-shadow .15s, transform .15s;
-        }
-        .field:focus {
-            border-color: var(--leaf);
-            box-shadow: 0 0 0 4px rgba(22, 101, 52, .12);
-            transform: translateY(-1px);
-        }
-        .label {
-            display: block;
-            font-size: .86rem;
-            font-weight: 700;
-            margin-bottom: .35rem;
-            color: var(--forest);
-        }
-        .error { color: #b42318; font-size: .8rem; margin-top: .25rem; }
-        .divider {
-            height: 1px;
-            background: var(--line);
-            margin: 1.75rem 0;
-        }
-        .actions {
-            display: flex;
-            flex-direction: column-reverse;
-            gap: 1rem;
-            align-items: stretch;
-        }
-        @media (min-width: 640px) {
-            .actions {
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-            }
-        }
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: 0;
-            border-radius: .9rem;
-            padding: .95rem 1.4rem;
-            font: inherit;
-            font-weight: 700;
-            color: #fff;
-            cursor: pointer;
-            background: linear-gradient(135deg, var(--forest), #15803d);
-            box-shadow: 0 12px 24px rgba(20, 83, 45, .22);
-            transition: transform .2s ease, box-shadow .2s ease;
-        }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 28px rgba(20, 83, 45, .28); }
-        .alert {
-            margin-bottom: 1rem;
-            border-radius: .9rem;
-            padding: .9rem 1rem;
-            font-size: .92rem;
-            font-weight: 600;
-        }
-        .alert-ok { background: #ecfdf3; color: var(--forest); border: 1px solid rgba(22,101,52,.25); }
-        .alert-err { background: #fef2f2; color: #9b1c1c; border: 1px solid #fecaca; }
-        @keyframes rise {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: .8; }
-            50% { transform: scale(1.08); opacity: 1; }
-        }
-        .ts-wrapper.single .ts-control {
-            border: 1px solid var(--line);
-            border-radius: .8rem;
-            padding: .72rem .95rem;
-            background: #fff;
-            font: inherit;
-            box-shadow: none;
-            min-height: auto;
-        }
-        .ts-wrapper.single.focus .ts-control {
-            border-color: var(--leaf);
-            box-shadow: 0 0 0 4px rgba(22, 101, 52, .12);
-        }
-        .ts-dropdown {
-            border: 1px solid var(--line);
-            border-radius: .8rem;
-            box-shadow: 0 12px 28px rgba(15, 36, 28, .12);
-            overflow: hidden;
-        }
-        .ts-dropdown .option.active,
-        .ts-dropdown .option:hover {
-            background: var(--mist);
-            color: var(--forest);
-        }
-        .ts-wrapper.single .ts-control input {
-            font: inherit;
-        }
-        .hint {
-            margin: .4rem 0 0;
-            font-size: .8rem;
-            color: var(--muted);
-            line-height: 1.45;
-        }
+        @include('permohonan.partials.public-form-css')
     </style>
 </head>
 <body>
     <div class="shell">
-        <nav class="nav">
-            <div class="logo-pair">
-                <img src="{{ asset('logokemenag.png') }}" alt="Logo Kementerian Agama">
-                <img src="{{ asset('logoiainbone.png') }}" alt="Logo IAIN Bone">
-                <div class="nav-brand">
-                    <strong>{{ config('app.name') }}</strong>
-                    <span>{{ config('app.full_name') }}</span>
-                </div>
-            </div>
-            <div class="nav-links">
-                <a href="{{ route('home') }}" class="primary">SK Pembimbing</a>
-                <a href="{{ route('penguji.create') }}">SK Penguji</a>
-                <a href="{{ route('permohonan.tracking') }}">Tracking</a>
-                <a href="{{ url('/admin') }}">Login Admin</a>
-            </div>
-        </nav>
+        @include('permohonan.partials.public-nav', ['active' => 'pembimbing'])
 
         <header class="hero">
-            <div class="hero-panel">
-                <div class="hero-kicker">Fakultas Syariah &amp; Hukum Islam · IAIN Bone</div>
-                <h1>{{ config('app.name') }}</h1>
-                <p class="hero-expand">{{ config('app.full_name') }}</p>
-                <p>Ajukan usul pembimbing skripsi secara daring, pantau progres, dan ikuti alur verifikasi akademik hingga penerbitan SK.</p>
-            </div>
+            <p class="hero-kicker"><span class="label-mob">Tahap 1 dari 3 · </span>Fakultas Syariah &amp; Hukum Islam</p>
+            <h1>Permohonan SK Pembimbing</h1>
+            <p>Lengkapi data mahasiswa sesuai berkas usul Ketua Program Studi, lalu unggah berkas tersebut. Progres dapat dipantau melalui NIM.</p>
         </header>
 
         <main class="form-shell">
@@ -329,19 +32,10 @@
             @endif
 
             @if ($errors->any())
-                <div class="alert alert-err">Mohon perbaiki isian yang masih kurang tepat.</div>
+                <div class="alert alert-err">Mohon lengkapi atau perbaiki isian yang belum sesuai.</div>
             @endif
 
-            <div class="steps">
-                <div class="step">
-                    <strong>Langkah 1</strong>
-                    <span>Isi data mahasiswa &amp; skripsi</span>
-                </div>
-                <div class="step">
-                    <strong>Langkah 2</strong>
-                    <span>Unggah usul dari Prodi, lalu kirim</span>
-                </div>
-            </div>
+            <p class="steps">Siapkan NIM, data diri, judul skripsi, serta berkas usul Ketua Program Studi yang telah mencantumkan nama dua pembimbing (PDF atau JPG, paling banyak 5 MB).</p>
 
             <form action="{{ route('permohonan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -351,7 +45,7 @@
                 <div class="grid cols-2">
                     <div>
                         <label class="label" for="nim">NIM <span style="color:#b42318;">*</span></label>
-                        <input id="nim" name="nim" type="text" value="{{ old('nim') }}" class="field" required>
+                        <input id="nim" name="nim" type="text" value="{{ old('nim') }}" class="field" required inputmode="numeric" autocomplete="username">
                         @error('nim') <p class="error">{{ $message }}</p> @enderror
                     </div>
                     <div>
@@ -406,7 +100,7 @@
 
                 <div class="divider"></div>
 
-                <h2 class="section-title">Data Skripsi &amp; Pembimbing</h2>
+                <h2 class="section-title">Data Skripsi sesuai Berkas Usul</h2>
                 @if (empty($dosens))
                     <div class="alert alert-err" style="margin-bottom:1rem;">
                         Daftar dosen belum tersedia. Hubungi akademik untuk menambahkan data dosen pembimbing.
@@ -421,8 +115,8 @@
                     <div>
                         <label class="label" for="pembimbing_1">Pembimbing 1 <span style="color:#b42318;">*</span></label>
                         <select id="pembimbing_1" name="pembimbing_1" class="field js-dosen-select" required
-                                data-placeholder="— Cari / pilih Pembimbing 1 —">
-                            <option value="">— Cari / pilih Pembimbing 1 —</option>
+                                data-placeholder="— Cari nama sesuai berkas usul —">
+                            <option value="">— Cari nama sesuai berkas usul —</option>
                             @foreach ($dosens as $nama)
                                 <option value="{{ $nama }}" @selected(old('pembimbing_1') === $nama)>{{ $nama }}</option>
                             @endforeach
@@ -432,17 +126,17 @@
                     <div>
                         <label class="label" for="pembimbing_2">Pembimbing 2 <span style="color:#b42318;">*</span></label>
                         <select id="pembimbing_2" name="pembimbing_2" class="field js-dosen-select" required
-                                data-placeholder="— Cari / pilih Pembimbing 2 —">
-                            <option value="">— Cari / pilih Pembimbing 2 —</option>
+                                data-placeholder="— Cari nama sesuai berkas usul —">
+                            <option value="">— Cari nama sesuai berkas usul —</option>
                             @foreach ($dosens as $nama)
                                 <option value="{{ $nama }}" @selected(old('pembimbing_2') === $nama)>{{ $nama }}</option>
                             @endforeach
                         </select>
-                        <p class="hint">Pembimbing 1 dan Pembimbing 2 harus berbeda. Daftar dosen dikelola akademik.</p>
+                        <p class="hint">Isikan nama pembimbing sebagaimana tercantum dalam berkas usul Ketua Program Studi. Pembimbing 1 dan Pembimbing 2 harus berbeda.</p>
                         @error('pembimbing_2') <p class="error">{{ $message }}</p> @enderror
                     </div>
                     <div style="grid-column: 1 / -1;">
-                        <label class="label" for="file_usul_pembimbing">Upload Usul Pembimbing dari Prodi <span style="color:#b42318;">*</span></label>
+                        <label class="label" for="file_usul_pembimbing">Unggah Berkas Usul dari Ketua Program Studi <span style="color:#b42318;">*</span></label>
                         <input id="file_usul_pembimbing" name="file_usul_pembimbing" type="file"
                                accept=".pdf,.jpg,.jpeg,.png" class="field" required>
                         <p style="margin:.4rem 0 0;font-size:.8rem;color:var(--muted);">Wajib. PDF / JPG / PNG, maksimal 5 MB.</p>
@@ -454,9 +148,9 @@
 
                 <div class="actions">
                     <p style="margin:0;font-size:.9rem;color:var(--muted);">
-                        Setelah dikirim, pantau status di halaman tracking dengan NIM Anda.
+                        Setelah terkirim, pantau status melalui menu Pelacakan dengan NIM.
                     </p>
-                    <button type="submit" class="btn">Kirim Permohonan</button>
+                    <button type="submit" class="btn">Kirim permohonan</button>
                 </div>
             </form>
         </main>

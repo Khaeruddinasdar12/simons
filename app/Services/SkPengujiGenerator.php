@@ -23,7 +23,7 @@ class SkPengujiGenerator
             ])->save();
         }
 
-        $pdf = $this->makePdf($permohonan->fresh(['mahasiswa']), preview: false);
+        $pdf = $this->makePdf($permohonan->fresh(['mahasiswa.judulSkripsiAktif']), preview: false);
 
         $path = 'sk-penguji/SK-'.$permohonan->id.'-'.now()->format('YmdHis').'.pdf';
         Storage::disk('public')->put($path, $pdf->output());
@@ -88,7 +88,7 @@ class SkPengujiGenerator
 
     protected function draftForPreview(PermohonanPenguji $permohonan): PermohonanPenguji
     {
-        $permohonan->loadMissing('mahasiswa');
+        $permohonan->loadMissing(['mahasiswa.judulSkripsiAktif']);
 
         $attrs = $permohonan->getAttributes();
 
@@ -122,7 +122,7 @@ class SkPengujiGenerator
      */
     protected function viewData(PermohonanPenguji $permohonan, bool $preview, bool $browserPreview): array
     {
-        $permohonan->loadMissing('mahasiswa');
+        $permohonan->loadMissing(['mahasiswa.judulSkripsiAktif']);
         $mahasiswa = $permohonan->mahasiswa;
         $nim = $mahasiswa?->nim ?? $permohonan->mahasiswa_nim;
 
@@ -142,6 +142,7 @@ class SkPengujiGenerator
         return [
             'permohonan' => $permohonan,
             'mahasiswa' => $mahasiswa,
+            'judulSkripsi' => $permohonan->judul_skripsi,
             'logoData' => $logoData,
             'qrTtd' => $this->qrDataUri($ttdUrl),
             'qrTracking' => $this->qrDataUri($trackingUrl),

@@ -7,7 +7,7 @@ Permohonan **SK Pembimbing Proposal Skripsi** Anda telah **berhasil diterbitkan*
 
 **Detail ringkas**
 - NIM: {{ $mahasiswa->nim }}
-- Program Studi: {{ $mahasiswa->program_studi?->value }}
+- Program Studi: {{ $mahasiswa->program_studi?->getLabel() }}
 - Nomor SK: {{ $permohonan->nomor_sk }}
 - Tanggal SK: {{ $permohonan->tanggal_sk?->translatedFormat('d F Y') }}
 - Pembimbing 1: {{ $permohonan->pembimbing_1 }}

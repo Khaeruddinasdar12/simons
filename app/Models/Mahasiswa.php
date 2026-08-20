@@ -37,6 +37,31 @@ class Mahasiswa extends Model
         return $this->hasMany(PermohonanPembimbing::class, 'mahasiswa_nim', 'nim');
     }
 
+    public function judulSkripsi(): HasMany
+    {
+        return $this->hasMany(JudulSkripsi::class, 'mahasiswa_nim', 'nim');
+    }
+
+    public function judulSkripsiAktif(): HasOne
+    {
+        return $this->hasOne(JudulSkripsi::class, 'mahasiswa_nim', 'nim')
+            ->where('is_aktif', true)
+            ->latest('id');
+    }
+
+    public function judulTerkini(): ?string
+    {
+        $this->loadMissing('judulSkripsiAktif');
+
+        if (filled($this->judulSkripsiAktif?->judul)) {
+            return $this->judulSkripsiAktif->judul;
+        }
+
+        $this->loadMissing('pembimbingTerbitTerakhir');
+
+        return $this->pembimbingTerbitTerakhir?->judul_skripsi;
+    }
+
     public function permohonanPenguji(): HasMany
     {
         return $this->hasMany(PermohonanPenguji::class, 'mahasiswa_nim', 'nim');

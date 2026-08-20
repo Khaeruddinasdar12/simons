@@ -5,9 +5,11 @@ namespace App\Filament\Resources;
 use App\Enums\ProgramStudi;
 use App\Enums\StatusPermohonan;
 use App\Filament\Resources\PermohonanPengujiResource\Pages;
+use App\Filament\Support\HapusPermohonanUi;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PermohonanPenguji;
+use App\Services\HapusPermohonanService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -135,12 +137,11 @@ class PermohonanPengujiResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\Textarea::make('judul_skripsi')
                             ->label('Judul Skripsi')
-                            ->required()
+                            ->disabled()
+                            ->dehydrated(false)
                             ->columnSpanFull()
                             ->rows(2)
-                            ->validationMessages([
-                                'required' => 'Judul skripsi wajib diisi.',
-                            ]),
+                            ->helperText('Judul mengikuti judul skripsi terkini mahasiswa. Perubahan judul dilakukan dari halaman SK Pembimbing agar setiap versi tercatat beserta waktunya.'),
                         Forms\Components\Select::make('penguji_1')
                             ->label('Penguji 1')
                             ->options(fn (?PermohonanPenguji $record): array => Dosen::optionsForSelect(
@@ -343,6 +344,31 @@ class PermohonanPengujiResource extends Resource
                     ->visible(fn (PermohonanPenguji $record): bool => auth()->user()?->can('previewSk', $record) ?? false),
                 Tables\Actions\EditAction::make()
                     ->visible(fn (PermohonanPenguji $record): bool => auth()->user()?->can('update', $record) ?? false),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus permohonan')
+                    ->modalHeading('Hapus permohonan SK Penguji')
+                    ->modalDescription(HapusPermohonanUi::deskripsiHapusPenguji())
+                    ->successNotificationTitle('Permohonan SK Penguji dihapus')
+                    ->using(function (PermohonanPenguji $record): void {
+                        app(HapusPermohonanService::class)->hapusPenguji($record);
+                    }),
+                Tables\Actions\Action::make('hapusDataNim')
+                    ->label('Hapus seluruh data NIM')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->visible(fn (PermohonanPenguji $record): bool => auth()->user()?->can('hapusDataNim', $record) ?? false)
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus seluruh data mahasiswa')
+                    ->modalDescription(fn (PermohonanPenguji $record): string => HapusPermohonanUi::deskripsiHapusNim(
+                        (string) $record->mahasiswa_nim,
+                        $record->mahasiswa?->nama_lengkap,
+                    ))
+                    ->form(fn (PermohonanPenguji $record): array => [
+                        HapusPermohonanUi::fieldKonfirmasiNim((string) $record->mahasiswa_nim),
+                    ])
+                    ->action(function (PermohonanPenguji $record): void {
+                        HapusPermohonanUi::hapusDataNim((string) $record->mahasiswa_nim);
+                    }),
                 Tables\Actions\Action::make('setujuiKabag')
                     ->label('Setujui')
                     ->icon('heroicon-o-check')
@@ -391,6 +417,20 @@ class PermohonanPengujiResource extends Resource
                     }),
             ])
             ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make()
+                    ->label('Hapus permohonan terpilih')
+                    ->modalHeading('Hapus permohonan terpilih')
+                    ->modalDescription('Permohonan SK Penguji yang dipilih akan dihapus permanen, termasuk berkas usul dan file SK.')
+                    ->successNotificationTitle('Permohonan terpilih dihapus')
+                    ->action(function (Collection $records): void {
+                        $service = app(HapusPermohonanService::class);
+
+                        foreach ($records as $record) {
+                            if ($record instanceof PermohonanPenguji) {
+                                $service->hapusPenguji($record);
+                            }
+                        }
+                    }),
                 Tables\Actions\BulkAction::make('setujuiKabagMassal')
                     ->label('Setujui Kabag')
                     ->icon('heroicon-o-check-circle')
@@ -510,7 +550,7 @@ class PermohonanPengujiResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with([
-            'mahasiswa',
+            'mahasiswa.judulSkripsiAktif',
             'permohonanPembimbing',
             'akademikVerifier',
             'kabagVerifier',

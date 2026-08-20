@@ -55,7 +55,7 @@ class JudulKorpus extends Model
             return null;
         }
 
-        $judul = (string) $permohonan->judul_skripsi;
+        $judul = (string) ($permohonan->mahasiswa?->judulTerkini() ?: $permohonan->judul_skripsi);
 
         return static::query()->updateOrCreate(
             [

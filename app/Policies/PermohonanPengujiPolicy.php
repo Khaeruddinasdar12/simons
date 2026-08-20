@@ -34,8 +34,17 @@ class PermohonanPengujiPolicy
 
     public function delete(User $user, PermohonanPenguji $record): bool
     {
-        return $user->isSuperadmin()
-            && $record->status === StatusPermohonan::Diajukan;
+        return $user->isSuperadmin();
+    }
+
+    public function deleteAny(User $user): bool
+    {
+        return $user->isSuperadmin();
+    }
+
+    public function hapusDataNim(User $user, PermohonanPenguji $record): bool
+    {
+        return $user->isSuperadmin();
     }
 
     public function sendToPimpinan(User $user, PermohonanPenguji $record): bool

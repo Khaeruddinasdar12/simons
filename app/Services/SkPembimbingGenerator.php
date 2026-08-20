@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPdf;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -27,6 +28,58 @@ class SkPembimbingGenerator
 
         $path = 'sk-pembimbing/SK-'.$permohonan->id.'-'.now()->format('YmdHis').'.pdf';
         Storage::disk('public')->put($path, $pdf->output());
+
+        return $path;
+    }
+
+    /**
+     * Simpan perubahan isian SK lalu generate ulang PDF.
+     * Nomor SK dan tanggal penetapan tidak diubah.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function perbaruiDanGenerateUlang(PermohonanPembimbing $permohonan, array $data): string
+    {
+        $nomorSk = $permohonan->nomor_sk;
+        $tanggalSk = $permohonan->tanggal_sk;
+
+        DB::transaction(function () use ($permohonan, $data, $nomorSk, $tanggalSk): void {
+            $mahasiswa = $permohonan->mahasiswa;
+            $mahasiswaData = $data['mahasiswa'] ?? [];
+
+            if ($mahasiswa && is_array($mahasiswaData) && $mahasiswaData !== []) {
+                $nimBaru = trim((string) ($mahasiswaData['nim'] ?? $mahasiswa->nim));
+                $mahasiswa->fill(Arr::except($mahasiswaData, ['nim']));
+
+                if ($nimBaru !== '' && $nimBaru !== $mahasiswa->nim) {
+                    $mahasiswa->nim = $nimBaru;
+                }
+
+                $mahasiswa->save();
+                $permohonan->mahasiswa_nim = $mahasiswa->nim;
+            }
+
+            $permohonan->fill(Arr::only($data, [
+                'semester',
+                'judul_skripsi',
+                'pembimbing_1',
+                'pembimbing_2',
+                'file_usul_pembimbing',
+            ]));
+
+            $permohonan->nomor_sk = $nomorSk;
+            $permohonan->tanggal_sk = $tanggalSk;
+            $permohonan->save();
+        });
+
+        $permohonan = $permohonan->fresh(['mahasiswa']) ?? $permohonan;
+        $lama = $permohonan->file_sk;
+        $path = $this->generate($permohonan);
+        $permohonan->forceFill(['file_sk' => $path])->saveQuietly();
+
+        if (filled($lama) && $lama !== $path) {
+            Storage::disk('public')->delete($lama);
+        }
 
         return $path;
     }
@@ -105,7 +158,7 @@ class SkPembimbingGenerator
 
     protected function draftForPreview(PermohonanPembimbing $permohonan): PermohonanPembimbing
     {
-        $permohonan->loadMissing('mahasiswa');
+        $permohonan->loadMissing(['mahasiswa.judulSkripsiAktif']);
 
         $attrs = $permohonan->getAttributes();
 
@@ -139,7 +192,7 @@ class SkPembimbingGenerator
      */
     protected function viewData(PermohonanPembimbing $permohonan, bool $preview, bool $browserPreview): array
     {
-        $permohonan->loadMissing('mahasiswa');
+        $permohonan->loadMissing(['mahasiswa.judulSkripsiAktif']);
         $mahasiswa = $permohonan->mahasiswa;
         $nim = $mahasiswa?->nim ?? $permohonan->mahasiswa_nim;
 
@@ -159,6 +212,7 @@ class SkPembimbingGenerator
         return [
             'permohonan' => $permohonan,
             'mahasiswa' => $mahasiswa,
+            'judulSkripsi' => $permohonan->judul_skripsi,
             'logoData' => $logoData,
             'qrTtd' => $this->qrDataUri($ttdUrl),
             'qrTracking' => $this->qrDataUri($trackingUrl),
@@ -174,7 +228,7 @@ class SkPembimbingGenerator
         // v5: Builder::create(); v6+: constructor (create() dihapus).
         if (method_exists(Builder::class, 'create')) {
             return Builder::create()
-                ->writer(new PngWriter())
+                ->writer(new PngWriter)
                 ->data($data)
                 ->size(180)
                 ->margin(2)
@@ -183,7 +237,7 @@ class SkPembimbingGenerator
         }
 
         $builder = new Builder(
-            writer: new PngWriter(),
+            writer: new PngWriter,
             data: $data,
             size: 180,
             margin: 2,

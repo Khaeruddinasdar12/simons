@@ -11,11 +11,7 @@ return [
         'nip' => null,
     ],
 
-    'prodi_lengkap' => [
-        'Hukum Tata Negara' => 'Hukum Tata Negara (Siyasah Syar\'iyyah)',
-        'Hukum Ekonomi Syariah' => 'Hukum Ekonomi Syariah (Muamalah)',
-        'Hukum Keluarga Islam' => 'Hukum Keluarga Islam (Ahwal Syakhshiyyah)',
-    ],
+    'prodi_lengkap' => \App\Enums\ProgramStudi::options(),
 
     'tahun_dipa' => (string) date('Y'),
 

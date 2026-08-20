@@ -271,7 +271,7 @@
                         <td class="pad"></td>
                         <td class="k">Judul Skripsi</td>
                         <td class="c">:</td>
-                        <td>{{ $permohonan->judul_skripsi }}</td>
+                        <td>{{ $judulSkripsi ?? $permohonan->judul_skripsi }}</td>
                     </tr>
                 </table>
             </td>

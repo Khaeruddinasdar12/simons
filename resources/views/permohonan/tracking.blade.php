@@ -4,387 +4,313 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Tracking — {{ config('app.name') }}</title>
+    <title>Pelacakan — {{ config('app.name') }}</title>
     <link rel="icon" href="{{ asset('logoiainbone.png') }}" type="image/png">
     <link rel="shortcut icon" href="{{ asset('logoiainbone.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ asset('logoiainbone.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=fraunces:500,600,700|manrope:400,500,600,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         :root {
-            --ink: #0f241c;
-            --forest: #14532d;
-            --leaf: #166534;
-            --paper: #f8faf8;
-            --line: rgba(20, 83, 45, 0.14);
-            --muted: rgba(15, 36, 28, 0.68);
+            --ink: #202124;
+            --forest: #137333;
+            --muted: #5f6368;
+            --line: #e8eaed;
+            --soft: #f8f9fa;
         }
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: 'Manrope', sans-serif;
+            font-family: Inter, Roboto, 'Segoe UI', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
             color: var(--ink);
-            background:
-                radial-gradient(circle at 12% 8%, rgba(34, 197, 94, 0.16), transparent 32%),
-                linear-gradient(165deg, #f4fbf6 0%, var(--paper) 45%, #eef7f1 100%);
+            background: #fff;
             min-height: 100vh;
+            overflow-x: clip;
         }
-        .brand-font { font-family: 'Fraunces', Georgia, serif; }
-        .shell { width: min(960px, calc(100% - 2rem)); margin: 0 auto; padding-bottom: 3rem; }
-        .nav {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 1rem; padding: 1.25rem 0;
+        .shell { width: min(1080px, calc(100% - 1.75rem)); margin: 0 auto; padding-bottom: 3rem; }
+        @include('permohonan.partials.public-nav-css')
+        .hero { padding: 1.5rem 0 1.35rem; }
+        .hero-kicker {
+            margin: 0 0 .35rem;
+            font-size: .75rem;
+            font-weight: 500;
+            color: var(--muted);
         }
-        .logo-pair { display: flex; align-items: center; gap: .85rem; }
-        .logo-pair img { height: 3.4rem; width: auto; object-fit: contain; }
-        .nav a {
-            text-decoration: none; color: var(--forest); font-weight: 600; font-size: .9rem;
-            padding: .55rem .9rem; border-radius: .7rem;
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(1.5rem, 3.5vw, 1.75rem);
+            font-weight: 500;
+            letter-spacing: -.015em;
+            line-height: 1.25;
         }
-        .nav a.primary { background: var(--forest); color: #fff; }
+        .hero p { margin: .5rem 0 0; color: var(--muted); max-width: 36rem; font-size: .9375rem; line-height: 1.55; }
         .field {
-            width: 100%; border: 1px solid var(--line); background: #fff;
-            border-radius: .8rem; padding: .8rem .95rem; outline: none; font: inherit;
+            width: 100%; border: 1px solid var(--line); background: var(--soft);
+            border-radius: .5rem; padding: .85rem .95rem; min-height: 3rem; outline: none; font: inherit; font-size: 16px;
         }
-        .label { display: block; font-size: .86rem; font-weight: 700; margin-bottom: .35rem; color: var(--forest); }
-        .card {
-            border: 1px solid var(--line); background: rgba(255,255,255,.9);
-            border-radius: 1.25rem; padding: 1.25rem 1.35rem; margin-top: 1rem;
-            box-shadow: 0 12px 28px rgba(15, 36, 28, .05);
-        }
+        .field:focus { background: #fff; border-color: var(--forest); box-shadow: 0 0 0 3px rgba(19,115,51,.12); }
+        .label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: .35rem; }
+        .block { padding: 1.35rem 0; border-top: 1px solid var(--line); }
         .btn {
-            border: 0; border-radius: .9rem; padding: .9rem 1.25rem; font: inherit; font-weight: 700;
-            color: #fff; cursor: pointer; background: linear-gradient(135deg, var(--forest), #15803d);
-            white-space: nowrap;
+            display: inline-flex; align-items: center; justify-content: center;
+            border: 0; border-radius: .6rem; padding: .75rem 1.05rem; font: inherit; font-weight: 600;
+            font-size: .9375rem; color: #fff; cursor: pointer; background: var(--forest);
+            text-decoration: none; min-height: 2.75rem;
+        }
+        .btn.ghost { background: #fff; color: var(--forest); border: 1px solid #c4e4cc; }
+        .search-row { display: flex; flex-direction: column; gap: .65rem; }
+        .search-row .btn { width: 100%; }
+        @media (min-width: 640px) {
+            .search-row { flex-direction: row; align-items: stretch; }
+            .search-row .field { flex: 1 1 auto; }
+            .search-row .btn { width: auto; min-height: 2.6rem; padding: .55rem 1.05rem; font-size: .875rem; }
+        }
+        @media (min-width: 720px) {
+            .shell { width: min(1080px, calc(100% - 2rem)); }
+            .hero h1 { font-weight: 500; }
+            .btn { min-height: 2.5rem; padding: .65rem 1.05rem; font-size: .9rem; }
         }
         .badge {
             display: inline-flex; align-items: center; border-radius: 999px;
-            padding: .25rem .75rem; font-size: .75rem; font-weight: 700;
+            padding: .2rem .7rem; font-size: .75rem; font-weight: 600; background: var(--soft); color: var(--muted);
+            white-space: nowrap;
         }
-        .pipeline {
-            display: grid; gap: .75rem; margin-top: 1rem;
+        .identitas h2 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+        .identitas p { margin: .3rem 0 0; color: var(--muted); font-size: .9375rem; }
+        .group { margin-top: 1.5rem; }
+        .group h2 {
+            margin: 0 0 .75rem;
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--muted);
         }
-        @media (min-width: 720px) {
-            .pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .logo-pair img { height: 4.2rem; }
-            .data-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .stack { display: grid; gap: .85rem; }
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: .85rem;
+            padding: 1.05rem 1.1rem 1.15rem;
+            background: #fff;
         }
-        .pipe-step {
-            border: 1px solid var(--line); border-radius: 1rem; padding: .9rem 1rem; background: #fff;
+        .panel.is-empty { background: var(--soft); }
+        .panel-head {
+            display: flex;
+            gap: .75rem;
+            justify-content: space-between;
+            align-items: flex-start;
         }
-        .pipe-step strong { display: block; font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; color: var(--leaf); }
-        .pipe-step p { margin: .4rem 0 0; font-size: .92rem; color: var(--muted); }
-        .data-grid { display: grid; gap: .85rem; margin-top: 1rem; }
-        .data-item {
-            border: 1px solid var(--line); border-radius: .9rem; padding: .8rem .95rem; background: #fff;
+        .panel h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+        .ket { margin: .55rem 0 0; color: var(--muted); font-size: .9rem; }
+        .note {
+            margin: .75rem 0 0;
+            padding: .7rem .85rem;
+            border-radius: .5rem;
+            background: #fde8e8;
+            color: #9b1c1c;
+            font-size: .9rem;
         }
-        .data-item span {
-            display: block; font-size: .72rem; font-weight: 700; letter-spacing: .04em;
-            text-transform: uppercase; color: var(--leaf); margin-bottom: .25rem;
+        .note.warn { background: #e8f0fe; color: #1e40af; }
+        .facts {
+            display: grid;
+            gap: .75rem 1.25rem;
+            margin: 1rem 0 0;
+            padding-top: .95rem;
+            border-top: 1px solid var(--line);
         }
-        .data-item p { margin: 0; font-size: .95rem; line-height: 1.45; }
-        .note-box {
-            border-left: 3px solid var(--leaf); background: #f3faf5;
-            padding: .85rem 1rem; border-radius: 0 .75rem .75rem 0; margin-top: .65rem;
+        @media (min-width: 640px) {
+            .facts { grid-template-columns: 1fr 1fr; }
         }
-        .full { grid-column: 1 / -1; }
+        .facts-full { grid-column: 1 / -1; }
+        .facts dt {
+            margin: 0;
+            font-size: .75rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+        .facts dd {
+            margin: .15rem 0 0;
+            font-size: .9375rem;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+        .actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .95rem; }
+        .progress {
+            list-style: none;
+            display: flex;
+            margin: 1rem 0 0;
+            padding: 0;
+        }
+        .progress-step {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 0;
+        }
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: calc(50% + 8px);
+            right: calc(-50% + 8px);
+            height: 2px;
+            background: var(--line);
+        }
+        .progress-step.is-done:not(:last-child)::after,
+        .progress-step.is-current:not(:last-child)::after {
+            background: #c4e4cc;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #dadce0;
+            z-index: 1;
+        }
+        .is-done .dot { background: var(--forest); }
+        .is-current .dot {
+            background: var(--forest);
+            box-shadow: 0 0 0 4px rgba(19, 115, 51, .16);
+        }
+        .is-reject .dot { background: #d93025; }
+        .progress-label {
+            margin-top: .4rem;
+            font-size: .68rem;
+            font-weight: 500;
+            color: var(--muted);
+            line-height: 1.25;
+        }
+        .is-done .progress-label,
+        .is-current .progress-label { color: #137333; }
+        .is-reject .progress-label { color: #d93025; }
+        a { color: var(--forest); }
     </style>
 </head>
 <body>
     <div class="shell">
-        <nav class="nav">
-            <div class="logo-pair">
-                <img src="{{ asset('logokemenag.png') }}" alt="Logo Kementerian Agama">
-                <img src="{{ asset('logoiainbone.png') }}" alt="Logo IAIN Bone">
-            </div>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-                <a href="{{ route('home') }}">SK Pembimbing</a>
-                <a href="{{ route('penguji.create') }}">SK Penguji</a>
-                <a href="{{ url('/admin') }}" class="primary">Login Admin</a>
-            </div>
-        </nav>
+        @include('permohonan.partials.public-nav', ['active' => 'tracking'])
 
-        <header style="padding: .5rem 0 1rem;">
-            <p class="brand-font" style="margin:0;font-size:2rem;color:var(--forest);">{{ config('app.name') }}</p>
-            <h1 class="brand-font" style="margin:.4rem 0 0;font-size:clamp(1.5rem,3vw,2.2rem);">Tracking Mahasiswa</h1>
-            <p style="margin:.55rem 0 0;color:var(--muted);max-width:36rem;">
-                Masukkan NIM untuk melihat profil, status SK Pembimbing, serta tahapan SK Penguji dan Undangan Munaqasyah.
-            </p>
+        <header class="hero">
+            <p class="hero-kicker">Fakultas Syariah &amp; Hukum Islam · IAIN Bone</p>
+            <h1>Pelacakan pengajuan</h1>
+            <p>Masukkan NIM untuk melihat data pengajuan dan progres setiap permohonan.</p>
         </header>
 
         @if (session('success'))
-            <div class="card" style="background:#ecfdf3;border-color:rgba(22,101,52,.25);color:var(--forest);font-weight:600;">
+            <div class="block" style="background:#e6f4ea;color:#137333;border-top:0;padding:.9rem 1rem;border-radius:.5rem;">
                 {{ session('success') }}
             </div>
         @endif
 
-        <form method="GET" action="{{ route('permohonan.tracking') }}" class="card">
-            <label class="label" for="nim">NIM Mahasiswa</label>
-            <div style="display:flex;flex-direction:column;gap:.75rem;">
-                <input id="nim" name="nim" type="text" value="{{ $nim }}" class="field" placeholder="Contoh: 2010101001" required>
-                <button type="submit" class="btn" style="align-self:flex-start;">Cari Status</button>
+        <form method="GET" action="{{ route('permohonan.tracking') }}" class="block">
+            <label class="label" for="nim">NIM</label>
+            <div class="search-row">
+                <input id="nim" name="nim" type="text" value="{{ $nim }}" class="field" placeholder="Contoh: 2010101001" inputmode="numeric" required>
+                <button type="submit" class="btn">Lacak</button>
             </div>
             @error('nim') <p style="color:#b42318;font-size:.85rem;">{{ $message }}</p> @enderror
         </form>
 
         @if ($searched)
             @if (! $mahasiswa)
-                <div class="card" style="text-align:center;color:var(--muted);">
-                    Tidak ditemukan data mahasiswa untuk NIM <strong>{{ $nim }}</strong>.
+                <div class="block" style="text-align:center;color:var(--muted);">
+                    Tidak ditemukan data pengajuan untuk NIM <strong>{{ $nim }}</strong>. Periksa kembali NIM, atau ajukan SK Pembimbing terlebih dahulu.
                 </div>
             @else
                 @php
-                    $pembimbingTerbaru = $permohonans->first();
-                    $pengujiTerbaru = $mahasiswa->permohonanPenguji->first();
-                    $munaqasyahTerbaru = $mahasiswa->undanganMunaqasyah->first();
-                    $labelPembimbing = $pembimbingTerbaru?->status?->label() ?? 'Belum diajukan';
-                    $labelPenguji = $pengujiTerbaru?->status?->label() ?? 'Belum diajukan';
-                    $labelMunaqasyah = $munaqasyahTerbaru?->status ?? 'Belum dibuka';
                     $bisaAjukanPenguji = $mahasiswa->bisaAjukanPenguji();
+                    $bisaAjukanMunaqasyah = $mahasiswa->bisaAjukanMunaqasyah();
                 @endphp
 
-                <article class="card">
-                    <h2 class="brand-font" style="margin:0;font-size:1.45rem;color:var(--forest);">{{ $mahasiswa->nama_lengkap }}</h2>
-                    <p style="margin:.35rem 0 0;color:var(--muted);">NIM {{ $mahasiswa->nim }} · {{ $mahasiswa->program_studi?->value }}</p>
+                <section class="block identitas">
+                    <h2>{{ $mahasiswa->nama_lengkap }}</h2>
+                    <p>NIM {{ $mahasiswa->nim }} · {{ $mahasiswa->program_studi?->getLabel() }}</p>
+                </section>
 
-                    <div class="pipeline">
-                        <div class="pipe-step">
-                            <strong>1. SK Pembimbing</strong>
-                            <p>{{ $labelPembimbing }}</p>
-                        </div>
-                        <div class="pipe-step">
-                            <strong>2. SK Penguji</strong>
-                            <p>{{ $labelPenguji }}</p>
-                            @if ($bisaAjukanPenguji)
-                                <p style="margin:.55rem 0 0;">
-                                    <a href="{{ route('penguji.create') }}" style="color:var(--forest);font-weight:700;">Ajukan SK Penguji</a>
-                                </p>
-                            @endif
-                        </div>
-                        <div class="pipe-step">
-                            <strong>3. Undangan Munaqasyah</strong>
-                            <p>{{ is_string($labelMunaqasyah) ? str_replace('_', ' ', $labelMunaqasyah) : $labelMunaqasyah }}</p>
-                        </div>
+                <section class="group">
+                    <h2>SK Pembimbing</h2>
+                    <div class="stack">
+                        @forelse ($permohonans as $item)
+                            @include('permohonan.partials.tracking-permohonan', [
+                                'item' => $item,
+                                'label1' => 'Pembimbing 1',
+                                'nama1' => $item->pembimbing_1,
+                                'label2' => 'Pembimbing 2',
+                                'nama2' => $item->pembimbing_2,
+                                'unduhUrl' => ($item->status === \App\Enums\StatusPermohonan::SkTerbit && filled($item->file_sk))
+                                    ? route('sk.download', $item)
+                                    : null,
+                                'unduhLabel' => 'Unduh SK Pembimbing',
+                            ])
+                        @empty
+                            <article class="panel is-empty">
+                                <h3>Belum diajukan</h3>
+                                <p class="ket">Belum ada permohonan SK Pembimbing untuk NIM ini.</p>
+                                <div class="actions">
+                                    <a class="btn" href="{{ route('pembimbing.create') }}">Ajukan SK Pembimbing</a>
+                                </div>
+                            </article>
+                        @endforelse
                     </div>
+                </section>
 
-                    <h3 style="margin:1.35rem 0 0;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--leaf);">
-                        Profil Mahasiswa
-                    </h3>
-                    <div class="data-grid">
-                        <div class="data-item"><span>NIM</span><p>{{ $mahasiswa->nim }}</p></div>
-                        <div class="data-item"><span>Nama Lengkap</span><p>{{ $mahasiswa->nama_lengkap }}</p></div>
-                        <div class="data-item"><span>Tempat / Tanggal Lahir</span><p>{{ $mahasiswa->tempat_tanggal_lahir }}</p></div>
-                        <div class="data-item"><span>No. HP</span><p>{{ $mahasiswa->no_hp }}</p></div>
-                        <div class="data-item"><span>Email</span><p>{{ $mahasiswa->email ?: '-' }}</p></div>
-                        <div class="data-item full"><span>Alamat Lengkap</span><p>{{ $mahasiswa->alamat_lengkap }}</p></div>
-                        <div class="data-item"><span>Program Studi</span><p>{{ $mahasiswa->program_studi?->value }}</p></div>
-                    </div>
-                </article>
-
-                @forelse ($permohonans as $item)
-                    @php
-                        $statusColor = match ($item->status) {
-                            \App\Enums\StatusPermohonan::SkTerbit => 'background:#e8f5ee;color:#14532d;',
-                            \App\Enums\StatusPermohonan::Ditolak => 'background:#fde8e8;color:#9b1c1c;',
-                            \App\Enums\StatusPermohonan::DikembalikanAkademik => 'background:#e8f0fe;color:#1e40af;',
-                            \App\Enums\StatusPermohonan::DikirimPimpinan => 'background:#fff7e6;color:#92400e;',
-                            default => 'background:#f3f4f6;color:#374151;',
-                        };
-                    @endphp
-                    <article class="card">
-                        <div style="display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:flex-start;">
-                            <div>
-                                <h2 class="brand-font" style="margin:0;font-size:1.25rem;color:var(--forest);">SK Pembimbing</h2>
-                                <p style="margin:.3rem 0 0;color:var(--muted);font-size:.92rem;">
-                                    Diajukan {{ $item->created_at?->translatedFormat('d F Y H:i') }}
-                                </p>
-                            </div>
-                            <span class="badge" style="{{ $statusColor }}">{{ $item->status->label() }}</span>
-                        </div>
-
-                        <div class="data-grid">
-                            <div class="data-item"><span>Semester</span><p>{{ $item->semester }}</p></div>
-                            <div class="data-item full"><span>Judul Skripsi</span><p>{{ $item->judul_skripsi }}</p></div>
-                            <div class="data-item"><span>Pembimbing 1</span><p>{{ $item->pembimbing_1 }}</p></div>
-                            <div class="data-item"><span>Pembimbing 2</span><p>{{ $item->pembimbing_2 ?: '-' }}</p></div>
-                            <div class="data-item full">
-                                <span>File Usul dari Prodi</span>
-                                <p>
-                                    @if ($item->file_usul_url)
-                                        <a href="{{ $item->file_usul_url }}" target="_blank" rel="noopener" style="color:var(--forest);font-weight:700;">
-                                            Lihat / unduh berkas
-                                        </a>
+                <section class="group">
+                    <h2>SK Penguji</h2>
+                    <div class="stack">
+                        @forelse ($mahasiswa->permohonanPenguji as $item)
+                            @include('permohonan.partials.tracking-permohonan', [
+                                'item' => $item,
+                                'label1' => 'Penguji 1',
+                                'nama1' => $item->penguji_1,
+                                'label2' => 'Penguji 2',
+                                'nama2' => $item->penguji_2,
+                                'unduhUrl' => ($item->status === \App\Enums\StatusPermohonan::SkTerbit && filled($item->file_sk))
+                                    ? route('sk.penguji.download', $item)
+                                    : null,
+                                'unduhLabel' => 'Unduh SK Penguji',
+                            ])
+                        @empty
+                            <article class="panel is-empty">
+                                <h3>Belum diajukan</h3>
+                                <p class="ket">
+                                    @if ($bisaAjukanPenguji)
+                                        SK Pembimbing telah terbit. Permohonan SK Penguji dapat diajukan.
                                     @else
-                                        -
+                                        Dapat diajukan setelah SK Pembimbing terbit.
                                     @endif
                                 </p>
-                            </div>
-                            @if ($item->nomor_sk)
-                                <div class="data-item"><span>Nomor SK</span><p>{{ $item->nomor_sk }}</p></div>
-                                <div class="data-item"><span>Tanggal SK</span><p>{{ $item->tanggal_sk?->translatedFormat('d F Y') ?: '-' }}</p></div>
-                            @endif
-                            @if ($item->file_sk)
-                                <div class="data-item full">
-                                    <span>File SK</span>
-                                    <p>
-                                        <a href="{{ route('sk.download', $item) }}" style="color:var(--forest);font-weight:700;">
-                                            Unduh PDF SK Pembimbing
-                                        </a>
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-
-                        <h3 style="margin:1.35rem 0 .35rem;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--leaf);">
-                            Catatan Perizinan
-                        </h3>
-
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">Akademik</p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->akademik_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->akademik_dikirim_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">Dikirim {{ $item->akademik_dikirim_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
-                                Kabag — {{ $item->formatRoleStatus($item->kabag_status) }}
-                            </p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->kabag_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->kabag_verified_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->kabag_verified_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
-                                Wadek 1 — {{ $item->formatRoleStatus($item->wadek1_status) }}
-                            </p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->wadek1_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->wadek1_verified_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->wadek1_verified_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
-                                Dekan — {{ $item->formatRoleStatus($item->dekan_status) }}
-                            </p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->dekan_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->dekan_verified_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->dekan_verified_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
-                    </article>
-                @empty
-                    <div class="card" style="color:var(--muted);">
-                        Belum ada permohonan SK Pembimbing untuk mahasiswa ini.
+                                @if ($bisaAjukanPenguji)
+                                    <div class="actions">
+                                        <a class="btn" href="{{ route('penguji.create') }}">Ajukan SK Penguji</a>
+                                    </div>
+                                @endif
+                            </article>
+                        @endforelse
                     </div>
-                @endforelse
+                </section>
 
-                @forelse ($mahasiswa->permohonanPenguji as $item)
-                    @php
-                        $statusColor = match ($item->status) {
-                            \App\Enums\StatusPermohonan::SkTerbit => 'background:#e8f5ee;color:#14532d;',
-                            \App\Enums\StatusPermohonan::Ditolak => 'background:#fde8e8;color:#9b1c1c;',
-                            \App\Enums\StatusPermohonan::DikembalikanAkademik => 'background:#e8f0fe;color:#1e40af;',
-                            \App\Enums\StatusPermohonan::DikirimPimpinan => 'background:#fff7e6;color:#92400e;',
-                            default => 'background:#f3f4f6;color:#374151;',
-                        };
-                    @endphp
-                    <article class="card">
-                        <div style="display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:flex-start;">
-                            <div>
-                                <h2 class="brand-font" style="margin:0;font-size:1.25rem;color:var(--forest);">SK Penguji</h2>
-                                <p style="margin:.3rem 0 0;color:var(--muted);font-size:.92rem;">
-                                    Diajukan {{ $item->created_at?->translatedFormat('d F Y H:i') }}
-                                </p>
-                            </div>
-                            <span class="badge" style="{{ $statusColor }}">{{ $item->status->label() }}</span>
+                <section class="group">
+                    <h2>Undangan Munaqasyah</h2>
+                    <article class="panel is-empty">
+                        <div class="panel-head">
+                            <h3>Belum dibuka</h3>
+                            <span class="badge">Segera</span>
                         </div>
-
-                        <div class="data-grid">
-                            <div class="data-item"><span>Semester</span><p>{{ $item->semester }}</p></div>
-                            <div class="data-item full"><span>Judul Skripsi</span><p>{{ $item->judul_skripsi }}</p></div>
-                            <div class="data-item"><span>Penguji 1</span><p>{{ $item->penguji_1 }}</p></div>
-                            <div class="data-item"><span>Penguji 2</span><p>{{ $item->penguji_2 ?: '-' }}</p></div>
-                            <div class="data-item full">
-                                <span>File Usulan dari Kaprodi</span>
-                                <p>
-                                    @if ($item->file_usul_url)
-                                        <a href="{{ $item->file_usul_url }}" target="_blank" rel="noopener" style="color:var(--forest);font-weight:700;">
-                                            Lihat / unduh berkas
-                                        </a>
-                                    @else
-                                        -
-                                    @endif
-                                </p>
-                            </div>
-                            @if ($item->nomor_sk)
-                                <div class="data-item"><span>Nomor SK</span><p>{{ $item->nomor_sk }}</p></div>
-                                <div class="data-item"><span>Tanggal SK</span><p>{{ $item->tanggal_sk?->translatedFormat('d F Y') ?: '-' }}</p></div>
+                        <p class="ket">
+                            @if ($bisaAjukanMunaqasyah)
+                                SK Penguji telah terbit. Pengajuan undangan munaqasyah akan dibuka pada tahap ini.
+                            @else
+                                Dapat diajukan setelah SK Penguji terbit.
                             @endif
-                            @if ($item->file_sk)
-                                <div class="data-item full">
-                                    <span>File SK</span>
-                                    <p>
-                                        <a href="{{ route('sk.penguji.download', $item) }}" style="color:var(--forest);font-weight:700;">
-                                            Unduh PDF SK Penguji
-                                        </a>
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-
-                        <h3 style="margin:1.35rem 0 .35rem;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--leaf);">
-                            Catatan Perizinan
-                        </h3>
-
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">Akademik</p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->akademik_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->akademik_dikirim_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">Dikirim {{ $item->akademik_dikirim_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
-                                Kabag — {{ $item->formatRoleStatus($item->kabag_status) }}
-                            </p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->kabag_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->kabag_verified_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->kabag_verified_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
-                                Wadek 1 — {{ $item->formatRoleStatus($item->wadek1_status) }}
-                            </p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->wadek1_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->wadek1_verified_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->wadek1_verified_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
-                        <div class="note-box">
-                            <p style="margin:0;font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--leaf);">
-                                Dekan — {{ $item->formatRoleStatus($item->dekan_status) }}
-                            </p>
-                            <p style="margin:.35rem 0 0;font-size:.92rem;">{{ $item->dekan_catatan ?: 'Belum ada catatan' }}</p>
-                            @if ($item->dekan_verified_at)
-                                <p style="margin:.3rem 0 0;font-size:.78rem;color:var(--muted);">{{ $item->dekan_verified_at->translatedFormat('d F Y H:i') }}</p>
-                            @endif
-                        </div>
+                        </p>
                     </article>
-                @empty
-                    <div class="card" style="color:var(--muted);">
-                        Belum ada permohonan SK Penguji untuk mahasiswa ini.
-                        @if ($bisaAjukanPenguji)
-                            <p style="margin:.65rem 0 0;">
-                                SK Pembimbing sudah terbit.
-                                <a href="{{ route('penguji.create') }}" style="color:var(--forest);font-weight:700;">Ajukan SK Penguji</a>
-                            </p>
-                        @endif
-                    </div>
-                @endforelse
+                </section>
             @endif
         @endif
     </div>

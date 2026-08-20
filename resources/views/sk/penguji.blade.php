@@ -237,7 +237,7 @@
         <p class="header-title">DEKAN FAKULTAS SYARIAH DAN HUKUM ISLAM</p>
         <p class="header-title">INSTITUT AGAMA ISLAM NEGERI BONE</p>
         <p class="nomor">NOMOR : {{ $permohonan->nomor_sk }}</p>
-        <p class="tentang">TENTANG<br>PENETAPAN SK PENGUJI SKRIPSI MAHASISWA</p>
+        <p class="tentang">TENTANG<br>PENETAPAN SK PENGUJI SKRIPSI</p>
         <p class="bismillah">DENGAN RAHMAT TUHAN YANG MAHA ESA</p>
         <p class="intro">DEKAN FAKULTAS SYARIAH DAN HUKUM ISLAM<br>INSTITUT AGAMA ISLAM NEGERI BONE</p>
     </div>
@@ -247,7 +247,7 @@
             <td class="label">Membaca</td>
             <td class="colon">:</td>
             <td>
-                Surat Permohonan mahasiswa a.n
+                1. Persetujuan pembimbing untuk menempuh Ujian Skripsi mahasiswa dengan data sebagai berikut:
                 <table class="detail-indent">
                     <tr>
                         <td class="pad"></td>
@@ -271,7 +271,7 @@
                         <td class="pad"></td>
                         <td class="k">Judul Skripsi</td>
                         <td class="c">:</td>
-                        <td>{{ $permohonan->judul_skripsi }}</td>
+                        <td>{{ $judulSkripsi ?? $permohonan->judul_skripsi }}</td>
                     </tr>
                 </table>
             </td>
@@ -280,8 +280,8 @@
             <td class="label">Menimbang</td>
             <td class="colon">:</td>
             <td>
-                <div>1.&nbsp;bahwa untuk menjamin kelancaran pelaksanaan ujian skripsi mahasiswa perlu ditetapkan SK Penguji Skripsi;</div>
-                <div>2.&nbsp;bahwa berdasarkan pertimbangan sebagaimana dimaksud dalam huruf a, perlu menetapkan Keputusan Dekan tentang Penetapan SK Penguji Skripsi Mahasiswa atas nama:</div>
+                <div>1.&nbsp;Bahwa mahasiswa yang tersebut namanya dalam Surat Keputusan ini telah memenuhi syarat untuk melakukan Ujian Skripsi Program Studi {{ $prodiLengkap }} FAKULTAS SYARIAH DAN HUKUM ISLAM IAIN Bone;</div>
+                <div>2.&nbsp;Bahwa menunjuk Saudara:</div>
                 <table class="detail-indent">
                     <tr>
                         <td class="pad"></td>
@@ -295,6 +295,12 @@
                         <td class="c">:</td>
                         <td class="bold">{{ $permohonan->penguji_2 }}</td>
                     </tr>
+                    <tr>
+                        <td class="pad"></td>
+                        <td class="k">dipandang cakap dan memenuhi syarat untuk diangkat sebagai Penguji Skripsi Prodi {{ $prodiLengkap }} Fakultas Syariah dan Hukum Islam IAIN Bone.</td>
+                        <td class="c">:</td>
+                        <td class="bold"></td>
+                    </tr>
                 </table>
             </td>
         </tr>
@@ -302,22 +308,19 @@
             <td class="label">Mengingat</td>
             <td class="colon">:</td>
             <td class="small">
-                <div>1.&nbsp;Undang-Undang Nomor 20 Tahun 2003 tentang Sistem Pendidikan Nasional;</div>
-                <div>2.&nbsp;Undang-Undang Nomor 12 Tahun 2012 tentang Pendidikan Tinggi;</div>
-                <div>3.&nbsp;Undang-Undang Nomor 5 Tahun 2014 tentang Aparatur Sipil Negara;</div>
+                <div>1.&nbsp;Undang-undang Nomor: 20 Tahun 2003 tentang Sistem Pendidikan Tinggi dan Pengelolaan Perguruan Tinggi;</div>
+                <div>2.&nbsp;Undang-Undang Nomor 14 Tahun 2005 tentang Guru dan Dosen;</div>
+                <div>3.&nbsp;Undang-Undang Nomor 12 Tahun 2012 tentang Pendidikan Tinggi;</div>
                 <div>4.&nbsp;Peraturan Pemerintah Nomor 4 Tahun 2014 tentang Penyelenggaraan Pendidikan Tinggi dan Pengelolaan Perguruan Tinggi;</div>
-                <div>5.&nbsp;Peraturan Presiden Nomor 87 Tahun 2021 tentang Penggajian Pegawai Negeri Sipil;</div>
-                <div>6.&nbsp;Keputusan Menteri Agama Nomor 289 Tahun 1997 tentang Pendirian STAIN Watampone;</div>
-                <div>7.&nbsp;Peraturan Menteri Agama Nomor 11 Tahun 2024 tentang Organisasi dan Tata Kerja Institut Agama Islam Negeri Bone;</div>
-                <div>8.&nbsp;Peraturan Menteri Agama Nomor 12 Tahun 2024 tentang Statuta Institut Agama Islam Negeri Bone;</div>
+                <div>5.&nbsp;Peraturan Menteri Agama RI Nomoer 3 Tahun 2019 Tentang Statuta Institut Agama Islam Negeri Bone (Berita Negara Republik Indonesia Tahun 2019 Nomor 148);</div>
+                <div>6.&nbsp;Keputusan Menteri Agama Nomor 29 Tahun 2018 tentang Struktur Organisasi dan Tata Kerja Institut Agama Islam Negeri Bone;</div>
+                <div>7.&nbsp;Peraturan Menteri Riset, Teknologi dan Pendidikan Tinggi Republik Indonesia Nomor 44 Tahun 2015 tentang Standar Nasional Pendidikan Tinggi (Berita Negara Republik Indonesia Tahun 2015 Nomor 1952);</div>
+                <div>8.&nbsp;Peraturan Menteri Keuangan Republik Indonesia Nomor 78/PMK.02/2019 tentang Standar Biaya Masukan Tahun Anggaran 2019 (Berita Negara Republik Indonesia Tahun 2019 Nomor 567);</div>
+                <div>9.&nbsp;Keputusan Rektor Institut Agama Islam Negeri Bone Nomor 246 Tahun 2019 tentang Rencana Strategis Institut Agama Islam Negeri Bone Tahun 2022;</div>
             </td>
         </tr>
         <tr>
-            <td class="label">Memperhatikan</td>
-            <td class="colon">:</td>
-            <td>
-                Surat Usulan Penguji Skripsi dari Ketua Program Studi {{ $prodiLengkap }}.
-            </td>
+            <td class="label">Memperhatikan Surat Persetujuan Penguji Skripsi mahasiswa bersangkutan.</td>
         </tr>
     </table>
 
@@ -328,7 +331,7 @@
             <td class="label">Menetapkan</td>
             <td class="colon">:</td>
             <td>
-                KEPUTUSAN DEKAN FAKULTAS SYARIAH DAN HUKUM ISLAM INSTITUT AGAMA ISLAM NEGERI BONE TENTANG PENETAPAN SK PENGUJI SKRIPSI MAHASISWA.
+                Surat Keputusan Dekan Fakultas Syariah dan Hukum Islam Institut Agama Islam Negeri Bone tentang Penguji Skripsi Mahasiswa Program Studi {{ $prodiLengkap }} 
             </td>
         </tr>
     </table>
@@ -338,7 +341,7 @@
             <td class="dict-key">KESATU</td>
             <td class="dict-colon">:</td>
             <td class="dict-val">
-                Menunjuk dan menetapkan saudara tersebut di bawah ini:
+                Menunjuk saudara:
                 <table class="detail-indent">
                     <tr>
                         <td class="pad"></td>
@@ -353,31 +356,13 @@
                         <td class="bold">{{ $permohonan->penguji_2 }}</td>
                     </tr>
                 </table>
-                sebagai Penguji Skripsi mahasiswa:
+                sebagai Penguji Skripsi saudara:
                 <table class="detail-indent">
                     <tr>
                         <td class="pad"></td>
                         <td class="k">Nama</td>
                         <td class="c">:</td>
                         <td>{{ strtoupper(($mahasiswa ?? $permohonan->mahasiswa)->nama_lengkap) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="pad"></td>
-                        <td class="k">NIM</td>
-                        <td class="c">:</td>
-                        <td>{{ ($mahasiswa ?? $permohonan->mahasiswa)->nim }}</td>
-                    </tr>
-                    <tr>
-                        <td class="pad"></td>
-                        <td class="k">Prodi</td>
-                        <td class="c">:</td>
-                        <td>{{ $prodiLengkap }}</td>
-                    </tr>
-                    <tr>
-                        <td class="pad"></td>
-                        <td class="k">Judul Skripsi</td>
-                        <td class="c">:</td>
-                        <td>{{ $permohonan->judul_skripsi }}</td>
                     </tr>
                 </table>
             </td>
@@ -386,20 +371,20 @@
             <td class="dict-key">KEDUA</td>
             <td class="dict-colon">:</td>
             <td class="dict-val">
-                Segala biaya yang timbul akibat keputusan ini dibebankan pada DIPA IAIN Bone Tahun {{ $config['tahun_dipa'] }}.
+                Segala biaya akibat diterbitkannya Surat Keputusan ini dibebankan kepada Anggaran Belanja DIPA Institut Agama Islam Negeri Bone Tahun 2025
             </td>
         </tr>
         <tr>
             <td class="dict-key">KETIGA</td>
             <td class="dict-colon">:</td>
             <td class="dict-val">
-                Keputusan ini mulai berlaku pada tanggal ditetapkan dengan ketentuan apabila di kemudian hari terdapat kekeliruan dalam keputusan ini akan diadakan perbaikan sebagaimana mestinya.
+                Segala Sesuatu akan diubah dan dipertimbangkan kembali sebagaimana mestinya, apabila dikemudian hari terdapat kekeliruan dalam surat keputusan ini.
             </td>
         </tr>
     </table>
 
     <p class="closing">
-        Keputusan Dekan ini disampaikan kepada yang bersangkutan untuk diketahui dan dilaksanakan sebagaimana mestinya.
+        Salinan Surat Keputusan ini disampaikan kepada masing-masing yang bersangkutan untuk diketahui dan dilaksanakan dengan penuh tanggung jawab.
     </p>
 
     <div class="ttd-wrap">

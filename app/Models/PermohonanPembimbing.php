@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Concerns\HasPermohonanWorkflow;
 use App\Concerns\SyncsAiTrainingData;
 use App\Enums\StatusPermohonan;
+use App\Enums\SumberJudulSkripsi;
+use App\Services\JudulSkripsiService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
 class PermohonanPembimbing extends Model
 {
@@ -61,9 +64,41 @@ class PermohonanPembimbing extends Model
         'dekan_verified_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function (self $permohonan): void {
+            app(JudulSkripsiService::class)->catatDariPermohonan($permohonan);
+        });
+
+        static::updated(function (self $permohonan): void {
+            if (! $permohonan->wasChanged('judul_skripsi')) {
+                return;
+            }
+
+            $user = Auth::user();
+
+            app(JudulSkripsiService::class)->catatDariPermohonan(
+                $permohonan,
+                $user instanceof User ? $user : null,
+                SumberJudulSkripsi::Perubahan,
+            );
+        });
+    }
+
     public function mahasiswa(): BelongsTo
     {
         return $this->belongsTo(Mahasiswa::class, 'mahasiswa_nim', 'nim');
+    }
+
+    public function riwayatJudul(): HasMany
+    {
+        return $this->hasMany(JudulSkripsi::class, 'mahasiswa_nim', 'mahasiswa_nim')
+            ->orderByDesc('id');
+    }
+
+    public function judulTerkini(): string
+    {
+        return $this->mahasiswa?->judulTerkini() ?: (string) $this->judul_skripsi;
     }
 
     public function permohonanPenguji(): HasMany
