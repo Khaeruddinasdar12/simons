@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 'panels::head.end',
                 fn (): HtmlString => new HtmlString(
-                    '<link rel="stylesheet" href="/css/filament-overrides.css?v=2">'
+                    '<link rel="stylesheet" href="/css/filament-overrides.css?v=3">'
                 ),
             )
             ->colors([

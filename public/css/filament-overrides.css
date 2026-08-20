@@ -18,22 +18,29 @@
 
 .fi-layout {
     display: flex !important;
-    flex-direction: row-reverse;
+    flex-direction: row-reverse !important;
     min-height: 100vh;
     width: 100%;
 }
 
 .fi-main-ctn {
     display: flex !important;
-    flex-direction: column;
+    flex-direction: column !important;
     flex: 1 1 auto;
     opacity: 1 !important;
     width: auto !important;
     max-width: 100%;
 }
 
+.fi-sidebar,
+.fi-main-sidebar {
+    order: -1;
+}
+
 @media (min-width: 1024px) {
     .fi-sidebar {
+        position: sticky;
+        top: 0;
         width: var(--sidebar-width, 20rem);
         flex-shrink: 0;
     }
