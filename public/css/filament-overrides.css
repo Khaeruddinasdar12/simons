@@ -1,0 +1,40 @@
+/* Layout safety for Filament when Tailwind utilities fail to constrain. */
+
+.fi-simple-layout {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.fi-simple-main {
+    max-width: 32rem !important;
+    width: 100%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.fi-simple-header .fi-logo {
+    max-width: 100%;
+}
+
+.fi-layout {
+    display: flex !important;
+    flex-direction: row-reverse;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.fi-main-ctn {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    opacity: 1 !important;
+    width: auto !important;
+    max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .fi-sidebar {
+        width: var(--sidebar-width, 20rem);
+        flex-shrink: 0;
+    }
+}
