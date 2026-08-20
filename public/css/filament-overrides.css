@@ -18,7 +18,8 @@
 
 .fi-layout {
     display: flex !important;
-    flex-direction: row-reverse !important;
+    flex-direction: row !important;
+    direction: ltr;
     min-height: 100vh;
     width: 100%;
 }
@@ -30,11 +31,12 @@
     opacity: 1 !important;
     width: auto !important;
     max-width: 100%;
+    order: 2 !important;
 }
 
 .fi-sidebar,
 .fi-main-sidebar {
-    order: -1;
+    order: 1 !important;
 }
 
 @media (min-width: 1024px) {

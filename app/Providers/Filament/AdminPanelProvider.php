@@ -36,9 +36,16 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(false)
             ->renderHook(
                 'panels::head.end',
-                fn (): HtmlString => new HtmlString(
-                    '<link rel="stylesheet" href="/css/filament-overrides.css?v=3">'
-                ),
+                fn (): HtmlString => new HtmlString(<<<'HTML'
+<link rel="stylesheet" href="/css/filament-overrides.css?v=4">
+<style>
+.fi-simple-main{max-width:32rem!important;margin-left:auto!important;margin-right:auto!important;width:100%}
+.fi-layout{display:flex!important;flex-direction:row!important;direction:ltr;min-height:100vh;width:100%}
+.fi-main-ctn{display:flex!important;flex-direction:column!important;flex:1 1 auto;opacity:1!important;width:auto!important;max-width:100%;order:2!important}
+.fi-sidebar,.fi-main-sidebar{order:1!important}
+@media (min-width:1024px){.fi-sidebar{position:sticky;top:0;width:var(--sidebar-width,20rem);flex-shrink:0}}
+</style>
+HTML),
             )
             ->colors([
                 'primary' => Color::Emerald,
