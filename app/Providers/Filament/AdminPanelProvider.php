@@ -10,8 +10,6 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\MaxWidth;
-use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -36,9 +34,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3rem')
             ->favicon(asset('logoiainbone.png'))
             ->darkMode(false)
-            ->simplePageMaxContentWidth(MaxWidth::Large)
             ->renderHook(
-                PanelsRenderHook::HEAD_END,
+                'panels::head.end',
                 fn (): HtmlString => new HtmlString(
                     '<link rel="stylesheet" href="/css/filament-overrides.css?v=2">'
                 ),
