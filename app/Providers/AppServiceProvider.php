@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         Table::configureUsing(function (Table $table): void {
             $table->paginationPageOptions([10, 25, 50, 100]);
         });
