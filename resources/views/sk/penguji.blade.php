@@ -281,25 +281,28 @@
         Salinan Surat Keputusan ini disampaikan kepada masing-masing yang bersangkutan untuk diketahui dan dilaksanakan dengan penuh tanggung jawab.
     </p>
 
-    <div class="ttd-wrap">
-        <div class="ttd-box">
-            <div>Ditetapkan di : {{ $config['kota'] }}</div>
-            <div>Pada Tanggal : {{ $permohonan->tanggal_sk?->translatedFormat('d F Y') }}</div>
-            <div style="margin-top:5px;">{{ $config['penandatangan']['jabatan'] }}</div>
-            <img src="{{ $qrTtd }}" class="qr-ttd" alt="QR Tanda Tangan">
-            <div class="small">Scan QR untuk verifikasi TTD digital</div>
-            <div class="nama">{{ $config['penandatangan']['nama'] }}</div>
-            @if (! empty($config['penandatangan']['nip']))
-                <div>NIP. {{ $config['penandatangan']['nip'] }}</div>
-            @endif
-        </div>
-        <div class="clear"></div>
-    </div>
-
-    <div class="footer-qr">
-        <img src="{{ $qrTracking }}" alt="QR Tracking">
-        <strong>QR Tracking:</strong> pindai untuk membuka halaman tracking status permohonan mahasiswa (NIM {{ $nimMhs }}).
-    </div>
+    <table class="end-block" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td width="50%"></td>
+            <td width="50%" class="ttd-box" valign="top">
+                <div>Ditetapkan di : {{ $config['kota'] }}</div>
+                <div>Pada Tanggal : {{ $permohonan->tanggal_sk?->translatedFormat('d F Y') }}</div>
+                <div style="margin-top:3px;">{{ $config['penandatangan']['jabatan'] }}</div>
+                <img src="{{ $qrTtd }}" class="qr-ttd" alt="QR Tanda Tangan">
+                <div class="small">Scan QR untuk verifikasi TTD digital</div>
+                <div class="nama">{{ $config['penandatangan']['nama'] }}</div>
+                @if (! empty($config['penandatangan']['nip']))
+                    <div>NIP. {{ $config['penandatangan']['nip'] }}</div>
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" class="footer-qr">
+                <img src="{{ $qrTracking }}" alt="QR Tracking">
+                <strong>QR Tracking:</strong> pindai untuk membuka halaman tracking status permohonan mahasiswa (NIM {{ $nimMhs }}).
+            </td>
+        </tr>
+    </table>
 
     @if (! empty($isBrowserPreview))
         </div>

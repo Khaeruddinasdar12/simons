@@ -1,53 +1,53 @@
-        @page { margin: 12mm 14mm 14mm 14mm; size: 210mm 330mm; }
+        @page { margin: 10mm 14mm 10mm 14mm; size: 210mm 330mm; }
         body {
             font-family: {{ empty($isBrowserPreview) ? 'Times, serif' : '"Times New Roman", Times, serif' }};
-            font-size: 9.5pt;
+            font-size: 9pt;
             color: #000;
-            line-height: 1.28;
+            line-height: 1.16;
         }
         p { margin: 0; }
         .center { text-align: center; }
-        .logo { width: 52px; height: auto; margin-bottom: 2px; }
+        .logo { width: 40px; height: auto; margin-bottom: 1px; }
         .header-title {
             font-weight: bold;
-            font-size: 10.5pt;
-            line-height: 1.15;
+            font-size: 10pt;
+            line-height: 1.12;
             margin: 0;
         }
         .nomor {
-            margin: 6px 0 3px;
+            margin: 3px 0 2px;
             font-weight: bold;
-            font-size: 9.5pt;
+            font-size: 9pt;
         }
         .tentang {
             font-weight: bold;
             text-transform: uppercase;
-            margin: 2px 0 6px;
-            font-size: 9.5pt;
-            line-height: 1.2;
+            margin: 1px 0 3px;
+            font-size: 9pt;
+            line-height: 1.15;
         }
         .bismillah {
             font-weight: bold;
-            margin: 6px 0 3px;
-            font-size: 9.5pt;
+            margin: 3px 0 2px;
+            font-size: 9pt;
         }
         .intro {
             font-weight: bold;
-            margin: 0 0 10px;
-            font-size: 9.5pt;
+            margin: 0 0 5px;
+            font-size: 9pt;
             text-transform: uppercase;
-            line-height: 1.2;
+            line-height: 1.12;
         }
         table.meta,
         table.dict {
             width: 100%;
             border-collapse: collapse;
-            margin: 0 0 6px 0;
+            margin: 0 0 2px 0;
         }
         table.meta td,
         table.dict td {
             vertical-align: top;
-            padding: 3px 0;
+            padding: 1.5px 0;
             text-align: left;
         }
         table.meta td.label,
@@ -65,20 +65,20 @@
         .memutuskan {
             text-align: center;
             font-weight: bold;
-            font-size: 10.5pt;
-            margin: 8px 0 6px;
+            font-size: 10pt;
+            margin: 4px 0 3px;
             letter-spacing: 1px;
         }
         table.kv,
         table.olist {
             width: 100%;
             border-collapse: collapse;
-            margin: 2px 0 3px 0;
+            margin: 1px 0 2px 0;
         }
         table.kv td,
         table.olist td {
             vertical-align: top;
-            padding: 1px 0;
+            padding: 0.5px 0;
             text-align: left;
         }
         table.kv td.k {
@@ -92,38 +92,39 @@
             width: 18px;
             white-space: nowrap;
         }
-        .ttd-wrap { width: 100%; margin-top: 12px; }
+        .end-block {
+            width: 100%;
+            margin-top: 6px;
+            page-break-inside: avoid;
+        }
         .ttd-box {
-            width: 46%;
-            float: right;
             text-align: left;
         }
         .ttd-box .nama {
             font-weight: bold;
             text-decoration: underline;
-            margin-top: 2px;
-            font-size: 9.5pt;
+            margin-top: 1px;
+            font-size: 9pt;
         }
         .qr-ttd {
-            width: 58px;
-            height: 58px;
-            margin: 3px 0;
+            width: 42px;
+            height: 42px;
+            margin: 2px 0;
         }
         .footer-qr {
-            clear: both;
-            margin-top: 10px;
-            padding-top: 4px;
+            margin-top: 4px;
+            padding-top: 3px;
             border-top: 1px solid #999;
             font-size: 7.5pt;
+            line-height: 1.15;
         }
         .footer-qr img {
-            width: 52px;
-            height: 52px;
+            width: 40px;
+            height: 40px;
             vertical-align: middle;
             margin-right: 6px;
         }
-        .small { font-size: 8pt; line-height: 1.25; }
-        .clear { clear: both; }
+        .small { font-size: 8pt; line-height: 1.16; }
         .preview-banner {
             background: #fff3cd;
             border: 1px solid #f0c36d;
@@ -131,7 +132,7 @@
             text-align: center;
             font-weight: bold;
             font-size: 8pt;
-            padding: 3px;
-            margin-bottom: 8px;
+            padding: 2px;
+            margin-bottom: 4px;
         }
-        .closing { margin-top: 8px; }
+        .closing { margin-top: 4px; }

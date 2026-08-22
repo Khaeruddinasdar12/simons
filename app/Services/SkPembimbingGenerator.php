@@ -232,7 +232,7 @@ class SkPembimbingGenerator
                 return Builder::create()
                     ->writer(new PngWriter)
                     ->data($data)
-                    ->size(120)
+                    ->size(90)
                     ->margin(2)
                     ->build()
                     ->getDataUri();
@@ -241,7 +241,7 @@ class SkPembimbingGenerator
             $builder = new Builder(
                 writer: new PngWriter,
                 data: $data,
-                size: 120,
+                size: 90,
                 margin: 2,
             );
 
