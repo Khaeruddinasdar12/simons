@@ -18,16 +18,25 @@ class SkPembimbingGenerator
 {
     public function generate(PermohonanPembimbing $permohonan): string
     {
+        @set_time_limit(120);
+
         if (blank($permohonan->sk_token)) {
             $permohonan->forceFill([
                 'sk_token' => Str::random(48),
             ])->save();
         }
 
-        $pdf = $this->makePdf($permohonan->fresh(['mahasiswa']), preview: false);
+        $pdf = $this->makePdf($permohonan->fresh(['mahasiswa']) ?? $permohonan, preview: false);
 
-        $path = 'sk-pembimbing/SK-'.$permohonan->id.'-'.now()->format('YmdHis').'.pdf';
-        Storage::disk('public')->put($path, $pdf->output());
+        $directory = 'sk-pembimbing';
+        Storage::disk('public')->makeDirectory($directory);
+
+        $path = $directory.'/SK-'.$permohonan->id.'-'.now()->format('YmdHis').'.pdf';
+        $written = Storage::disk('public')->put($path, $pdf->output());
+
+        if ($written === false) {
+            throw new \RuntimeException('Gagal menyimpan PDF SK ke storage. Periksa permission folder storage/app/public.');
+        }
 
         return $path;
     }
@@ -189,10 +198,7 @@ class SkPembimbingGenerator
             ? route('sk.verify', ['token' => $token])
             : url('/sk/verifikasi/preview');
 
-        $logoPath = public_path('logoiainbone.png');
-        $logoData = is_file($logoPath)
-            ? 'data:image/png;base64,'.base64_encode((string) file_get_contents($logoPath))
-            : null;
+        $logoData = app(SkDocumentAssets::class)->logoDataUri();
 
         $prodiValue = $mahasiswa?->program_studi?->value;
 
@@ -212,24 +218,30 @@ class SkPembimbingGenerator
 
     protected function qrDataUri(string $data): string
     {
-        // v5: Builder::create(); v6+: constructor (create() dihapus).
-        if (method_exists(Builder::class, 'create')) {
-            return Builder::create()
-                ->writer(new PngWriter)
-                ->data($data)
-                ->size(180)
-                ->margin(2)
-                ->build()
-                ->getDataUri();
+        try {
+            // v5: Builder::create(); v6+: constructor (create() dihapus).
+            if (method_exists(Builder::class, 'create')) {
+                return Builder::create()
+                    ->writer(new PngWriter)
+                    ->data($data)
+                    ->size(180)
+                    ->margin(2)
+                    ->build()
+                    ->getDataUri();
+            }
+
+            $builder = new Builder(
+                writer: new PngWriter,
+                data: $data,
+                size: 180,
+                margin: 2,
+            );
+
+            return $builder->build()->getDataUri();
+        } catch (\Throwable $e) {
+            report($e);
+
+            return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
         }
-
-        $builder = new Builder(
-            writer: new PngWriter,
-            data: $data,
-            size: 180,
-            margin: 2,
-        );
-
-        return $builder->build()->getDataUri();
     }
 }

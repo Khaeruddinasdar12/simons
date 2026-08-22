@@ -515,13 +515,17 @@ class ViewPermohonanPembimbing extends ViewRecord
                         return;
                     }
 
-                    $path = $generator->generate($record->fresh());
+                    $pdfError = null;
 
-                    $record->update([
-                        'file_sk' => $path,
-                    ]);
+                    try {
+                        $path = $generator->generate($record->fresh() ?? $record);
+                        $record->forceFill(['file_sk' => $path])->saveQuietly();
+                    } catch (\Throwable $e) {
+                        report($e);
+                        $pdfError = $e->getMessage();
+                    }
 
-                    $record = $record->fresh();
+                    $record = $record->fresh() ?? $record;
                     $emailTerkirim = false;
                     $emailError = null;
                     $emailPenerima = null;
@@ -536,9 +540,14 @@ class ViewPermohonanPembimbing extends ViewRecord
                         $emailError = $e->getMessage();
                     }
 
-                    $this->refreshRecord();
-
-                    if ($emailTerkirim) {
+                    if ($pdfError) {
+                        Notification::make()
+                            ->title('SK terbit, tetapi PDF gagal dibuat')
+                            ->body('Nomor: '.$nomorSk.'. Gunakan Generate Ulang SK. '.$pdfError)
+                            ->warning()
+                            ->persistent()
+                            ->send();
+                    } elseif ($emailTerkirim) {
                         Notification::make()
                             ->title('SK berhasil diterbitkan')
                             ->body('Nomor: '.$nomorSk.' - Email dikirim ke '.$emailPenerima)
@@ -558,6 +567,8 @@ class ViewPermohonanPembimbing extends ViewRecord
                             ->success()
                             ->send();
                     }
+
+                    $this->redirect(static::getResource()::getUrl('view', ['record' => $record]));
                 }),
 
             Actions\Action::make('kirimUlangEmailSk')

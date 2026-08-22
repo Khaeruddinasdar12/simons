@@ -21,14 +21,22 @@ trait SyncsAiTrainingData
                 return;
             }
 
-            JudulKorpus::syncFromPermohonan($model);
+            try {
+                JudulKorpus::syncFromPermohonan($model);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         });
 
         static::deleted(function (self $model): void {
-            JudulKorpus::query()
-                ->where('sumber_type', $model::class)
-                ->where('sumber_id', $model->getKey())
-                ->delete();
+            try {
+                JudulKorpus::query()
+                    ->where('sumber_type', $model::class)
+                    ->where('sumber_id', $model->getKey())
+                    ->delete();
+            } catch (\Throwable $e) {
+                report($e);
+            }
         });
     }
 
