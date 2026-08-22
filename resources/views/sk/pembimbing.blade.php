@@ -81,6 +81,7 @@
         table.dict-indent,
         table.detail-indent {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
             margin: 1px 0 1px 0;
         }

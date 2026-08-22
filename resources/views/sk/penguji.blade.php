@@ -81,6 +81,7 @@
         table.dict-indent,
         table.detail-indent {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
             margin: 1px 0 1px 0;
         }
@@ -295,13 +296,8 @@
                         <td class="c">:</td>
                         <td class="bold">{{ $permohonan->penguji_2 }}</td>
                     </tr>
-                    <tr>
-                        <td class="pad"></td>
-                        <td class="k">dipandang cakap dan memenuhi syarat untuk diangkat sebagai Penguji Skripsi Prodi {{ $prodiLengkap }} Fakultas Syariah dan Hukum Islam IAIN Bone.</td>
-                        <td class="c">:</td>
-                        <td class="bold"></td>
-                    </tr>
                 </table>
+                <div>dipandang cakap dan memenuhi syarat untuk diangkat sebagai Penguji Skripsi Prodi {{ $prodiLengkap }} Fakultas Syariah dan Hukum Islam IAIN Bone.</div>
             </td>
         </tr>
         <tr>
@@ -320,7 +316,11 @@
             </td>
         </tr>
         <tr>
-            <td class="label">Memperhatikan Surat Persetujuan Penguji Skripsi mahasiswa bersangkutan.</td>
+            <td class="label">Memperhatikan</td>
+            <td class="colon">:</td>
+            <td>
+                Surat persetujuan penguji skripsi mahasiswa bersangkutan.
+            </td>
         </tr>
     </table>
 
