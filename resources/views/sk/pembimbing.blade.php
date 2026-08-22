@@ -111,56 +111,56 @@
 
     <table class="meta" width="100%" cellpadding="0" cellspacing="0">
         <tr>
-            <td class="label" width="125" valign="top">Membaca</td>
-            <td class="colon" width="16" valign="top">:</td>
+            <td class="label" width="1%" valign="top">Membaca</td>
+            <td class="colon" width="1%" valign="top">:</td>
             <td valign="top">
                 Persetujuan pembimbing untuk menempuh ujian Proposal Skripsi mahasiswa dengan data sebagai berikut:
                 <table class="kv" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                        <td class="k" width="118" valign="top">Nama</td>
-                        <td class="c" width="16" valign="top">:</td>
+                        <td class="k" width="1%" valign="top">Nama</td>
+                        <td class="c" width="1%" valign="top">:</td>
                         <td valign="top">{{ $namaMhs }}</td>
                     </tr>
                     <tr>
-                        <td class="k" width="118" valign="top">NIM</td>
-                        <td class="c" width="16" valign="top">:</td>
+                        <td class="k" width="1%" valign="top">NIM</td>
+                        <td class="c" width="1%" valign="top">:</td>
                         <td valign="top">{{ $nimMhs }}</td>
                     </tr>
                     <tr>
-                        <td class="k" width="118" valign="top">Prodi</td>
-                        <td class="c" width="16" valign="top">:</td>
+                        <td class="k" width="1%" valign="top">Prodi</td>
+                        <td class="c" width="1%" valign="top">:</td>
                         <td valign="top">{{ $prodiLengkap }}</td>
                     </tr>
                     <tr>
-                        <td class="k" width="118" valign="top">Judul Skripsi</td>
-                        <td class="c" width="16" valign="top">:</td>
+                        <td class="k" width="1%" valign="top">Judul Skripsi</td>
+                        <td class="c" width="1%" valign="top">:</td>
                         <td valign="top">{{ $judul }}</td>
                     </tr>
                 </table>
             </td>
         </tr>
         <tr>
-            <td class="label" width="125" valign="top">Menimbang</td>
-            <td class="colon" width="16" valign="top">:</td>
+            <td class="label" width="1%" valign="top">Menimbang</td>
+            <td class="colon" width="1%" valign="top">:</td>
             <td valign="top">
                 <table class="olist" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                        <td class="n" width="22" valign="top">1.</td>
+                        <td class="n" width="1%" valign="top">1.</td>
                         <td valign="top">Bahwa mahasiswa yang tersebut namanya dalam Surat Keputusan ini telah memenuhi syarat untuk melakukan ujian proposal skripsi Program Studi {{ $prodiLengkap }} Fakultas Syariah dan Hukum Islam IAIN Bone;</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">2.</td>
+                        <td class="n" width="1%" valign="top">2.</td>
                         <td valign="top">
                             Bahwa menunjuk Saudara:
                             <table class="kv" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
-                                    <td class="k" width="118" valign="top">Pembimbing 1</td>
-                                    <td class="c" width="16" valign="top">:</td>
+                                    <td class="k" width="1%" valign="top">Pembimbing 1</td>
+                                    <td class="c" width="1%" valign="top">:</td>
                                     <td class="bold" valign="top">{{ $permohonan->pembimbing_1 }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="k" width="118" valign="top">Pembimbing 2</td>
-                                    <td class="c" width="16" valign="top">:</td>
+                                    <td class="k" width="1%" valign="top">Pembimbing 2</td>
+                                    <td class="c" width="1%" valign="top">:</td>
                                     <td class="bold" valign="top">{{ $permohonan->pembimbing_2 }}</td>
                                 </tr>
                             </table>
@@ -170,48 +170,48 @@
             </td>
         </tr>
         <tr>
-            <td class="label" width="125" valign="top">Mengingat</td>
-            <td class="colon" width="16" valign="top">:</td>
+            <td class="label" width="1%" valign="top">Mengingat</td>
+            <td class="colon" width="1%" valign="top">:</td>
             <td class="small" valign="top">
                 <table class="olist" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                        <td class="n" width="22" valign="top">1.</td>
+                        <td class="n" width="1%" valign="top">1.</td>
                         <td valign="top">Undang-Undang Nomor 20 Tahun 2003 tentang Sistem Pendidikan Tinggi dan Pengelolaan Perguruan Tinggi;</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">2.</td>
+                        <td class="n" width="1%" valign="top">2.</td>
                         <td valign="top">Undang-Undang Nomor 14 Tahun 2005 tentang Guru dan Dosen;</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">3.</td>
+                        <td class="n" width="1%" valign="top">3.</td>
                         <td valign="top">Undang-Undang Nomor 12 Tahun 2012 tentang Pendidikan Tinggi;</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">4.</td>
+                        <td class="n" width="1%" valign="top">4.</td>
                         <td valign="top">Peraturan Pemerintah Nomor 4 Tahun 2014 tentang Penyelenggaraan Pendidikan Tinggi dan Pengelolaan Perguruan Tinggi;</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">5.</td>
+                        <td class="n" width="1%" valign="top">5.</td>
                         <td valign="top">Peraturan Menteri Agama RI Nomor 3 Tahun 2019 tentang Statuta Institut Agama Islam Negeri Bone (Berita Negara Republik Indonesia Tahun 2019 Nomor 148);</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">6.</td>
+                        <td class="n" width="1%" valign="top">6.</td>
                         <td valign="top">Peraturan Menteri Agama RI Nomor 29 Tahun 2018 tentang Struktur Organisasi dan Tata Kerja Institut Agama Islam Negeri Bone;</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">7.</td>
+                        <td class="n" width="1%" valign="top">7.</td>
                         <td valign="top">Peraturan Menteri Riset, Teknologi dan Pendidikan Tinggi Republik Indonesia Nomor 44 Tahun 2015 tentang Standar Nasional Pendidikan Tinggi (Berita Negara Republik Indonesia Tahun 2015 Nomor 1952);</td>
                     </tr>
                     <tr>
-                        <td class="n" width="22" valign="top">8.</td>
+                        <td class="n" width="1%" valign="top">8.</td>
                         <td valign="top">Peraturan Menteri Keuangan Republik Indonesia Nomor 78/PMK.02/2019 tentang Standar Biaya Masukan Tahun Anggaran 2019 (Berita Negara Republik Indonesia Tahun 2019 Nomor 567);</td>
                     </tr>
                 </table>
             </td>
         </tr>
         <tr>
-            <td class="label" width="125" valign="top">Memperhatikan</td>
-            <td class="colon" width="16" valign="top">:</td>
+            <td class="label" width="1%" valign="top">Memperhatikan</td>
+            <td class="colon" width="1%" valign="top">:</td>
             <td valign="top">Surat persetujuan pembimbing proposal skripsi mahasiswa bersangkutan.</td>
         </tr>
     </table>
@@ -220,8 +220,8 @@
 
     <table class="meta" width="100%" cellpadding="0" cellspacing="0">
         <tr>
-            <td class="label" width="125" valign="top">Menetapkan</td>
-            <td class="colon" width="16" valign="top">:</td>
+            <td class="label" width="1%" valign="top">Menetapkan</td>
+            <td class="colon" width="1%" valign="top">:</td>
             <td valign="top">
                 Surat Keputusan Dekan Fakultas Syariah dan Hukum Islam Institut Agama Islam Negeri Bone tentang pembimbing proposal skripsi mahasiswa Program Studi {{ $prodiLengkap }}.
             </td>
@@ -230,19 +230,19 @@
 
     <table class="dict" width="100%" cellpadding="0" cellspacing="0">
         <tr>
-            <td class="dict-key" width="125" valign="top">KESATU</td>
-            <td class="dict-colon" width="16" valign="top">:</td>
+            <td class="dict-key" width="1%" valign="top">KESATU</td>
+            <td class="dict-colon" width="1%" valign="top">:</td>
             <td class="dict-val" valign="top">
                 Menunjuk Saudara(i):
                 <table class="kv" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                        <td class="k" width="118" valign="top">Pembimbing 1</td>
-                        <td class="c" width="16" valign="top">:</td>
+                        <td class="k" width="1%" valign="top">Pembimbing 1</td>
+                        <td class="c" width="1%" valign="top">:</td>
                         <td class="bold" valign="top">{{ $permohonan->pembimbing_1 }}</td>
                     </tr>
                     <tr>
-                        <td class="k" width="118" valign="top">Pembimbing 2</td>
-                        <td class="c" width="16" valign="top">:</td>
+                        <td class="k" width="1%" valign="top">Pembimbing 2</td>
+                        <td class="c" width="1%" valign="top">:</td>
                         <td class="bold" valign="top">{{ $permohonan->pembimbing_2 }}</td>
                     </tr>
                 </table>
@@ -250,15 +250,15 @@
             </td>
         </tr>
         <tr>
-            <td class="dict-key" width="125" valign="top">KEDUA</td>
-            <td class="dict-colon" width="16" valign="top">:</td>
+            <td class="dict-key" width="1%" valign="top">KEDUA</td>
+            <td class="dict-colon" width="1%" valign="top">:</td>
             <td class="dict-val" valign="top">
                 Segala biaya akibat diterbitkannya Surat Keputusan ini dibebankan kepada anggaran belanja DIPA Institut Agama Islam Negeri Bone tahun {{ $config['tahun_dipa'] }}.
             </td>
         </tr>
         <tr>
-            <td class="dict-key" width="125" valign="top">KETIGA</td>
-            <td class="dict-colon" width="16" valign="top">:</td>
+            <td class="dict-key" width="1%" valign="top">KETIGA</td>
+            <td class="dict-colon" width="1%" valign="top">:</td>
             <td class="dict-val" valign="top">
                 Segala sesuatu akan diubah dan dipertimbangkan kembali sebagaimana mestinya, apabila di kemudian hari terdapat kekeliruan dalam surat keputusan ini.
             </td>

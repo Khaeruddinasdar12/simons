@@ -42,6 +42,7 @@
         table.dict {
             width: 100%;
             border-collapse: collapse;
+            table-layout: auto;
             margin: 0 0 2px 0;
         }
         table.meta td,
@@ -52,16 +53,17 @@
         }
         table.meta td.label,
         table.dict td.dict-key {
-            width: 125px;
+            width: 1%;
             font-weight: bold;
             white-space: nowrap;
-            padding-right: 8px;
+            padding-right: 4px;
         }
         table.meta td.colon,
         table.dict td.dict-colon {
-            width: 16px;
-            padding-right: 8px;
-            text-align: center;
+            width: 1%;
+            white-space: nowrap;
+            padding: 0 6px 0 2px;
+            text-align: left;
         }
         .bold { font-weight: bold; }
         .memutuskan {
@@ -75,6 +77,7 @@
         table.olist {
             width: 100%;
             border-collapse: collapse;
+            table-layout: auto;
             margin: 1px 0 2px 0;
         }
         table.kv td,
@@ -84,17 +87,18 @@
             text-align: left;
         }
         table.kv td.k {
-            width: 118px;
+            width: 1%;
             white-space: nowrap;
-            padding-right: 8px;
+            padding-right: 4px;
         }
         table.kv td.c {
-            width: 16px;
-            padding-right: 8px;
-            text-align: center;
+            width: 1%;
+            white-space: nowrap;
+            padding: 0 6px 0 2px;
+            text-align: left;
         }
         table.olist td.n {
-            width: 22px;
+            width: 1%;
             white-space: nowrap;
             padding-right: 6px;
         }
