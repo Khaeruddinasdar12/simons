@@ -6,7 +6,7 @@
     <style>
         @page { margin: 12mm 14mm 12mm 14mm; size: 210mm 330mm; }
         body {
-            font-family: "Times New Roman", Times, serif;
+            font-family: {{ empty($isBrowserPreview) ? 'Times, serif' : '"Times New Roman", Times, serif' }};
             font-size: 9.5pt;
             color: #000;
             line-height: 1.18;

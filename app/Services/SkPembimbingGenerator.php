@@ -49,6 +49,25 @@ class SkPembimbingGenerator
      */
     public function perbaruiDanGenerateUlang(PermohonanPembimbing $permohonan, array $data): string
     {
+        $this->perbaruiData($permohonan, $data);
+
+        $permohonan = $permohonan->fresh(['mahasiswa']) ?? $permohonan;
+        $lama = $permohonan->file_sk;
+        $path = $this->generate($permohonan);
+        $permohonan->forceFill(['file_sk' => $path])->saveQuietly();
+
+        if (filled($lama) && $lama !== $path) {
+            Storage::disk('public')->delete($lama);
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function perbaruiData(PermohonanPembimbing $permohonan, array $data): void
+    {
         $nomorSk = $permohonan->nomor_sk;
         $tanggalSk = $permohonan->tanggal_sk;
 
@@ -80,17 +99,6 @@ class SkPembimbingGenerator
             $permohonan->tanggal_sk = $tanggalSk;
             $permohonan->save();
         });
-
-        $permohonan = $permohonan->fresh(['mahasiswa']) ?? $permohonan;
-        $lama = $permohonan->file_sk;
-        $path = $this->generate($permohonan);
-        $permohonan->forceFill(['file_sk' => $path])->saveQuietly();
-
-        if (filled($lama) && $lama !== $path) {
-            Storage::disk('public')->delete($lama);
-        }
-
-        return $path;
     }
 
     /**
@@ -224,7 +232,7 @@ class SkPembimbingGenerator
                 return Builder::create()
                     ->writer(new PngWriter)
                     ->data($data)
-                    ->size(180)
+                    ->size(120)
                     ->margin(2)
                     ->build()
                     ->getDataUri();
@@ -233,7 +241,7 @@ class SkPembimbingGenerator
             $builder = new Builder(
                 writer: new PngWriter,
                 data: $data,
-                size: 180,
+                size: 120,
                 margin: 2,
             );
 

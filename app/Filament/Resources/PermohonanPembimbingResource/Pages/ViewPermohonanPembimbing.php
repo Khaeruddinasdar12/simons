@@ -6,10 +6,10 @@ use App\Enums\StatusPermohonan;
 use App\Enums\SumberJudulSkripsi;
 use App\Filament\Resources\PermohonanPembimbingResource;
 use App\Filament\Support\HapusPermohonanUi;
+use App\Jobs\FinalisasiSkPembimbingJob;
 use App\Models\PermohonanPembimbing;
 use App\Models\User;
 use App\Services\HapusPermohonanService;
-use App\Services\SkPembimbingMailService;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Infolists;
@@ -119,7 +119,9 @@ class ViewPermohonanPembimbing extends ViewRecord
                         Infolists\Components\TextEntry::make('tanggal_sk')->label('Tanggal SK')->date('d/m/Y')->placeholder('-'),
                         Infolists\Components\TextEntry::make('file_sk')
                             ->label('File SK')
-                            ->formatStateUsing(fn (?string $state): string => $state ? 'Lihat File SK' : '-')
+                            ->formatStateUsing(fn (?string $state, PermohonanPembimbing $record): string => $state
+                                ? 'Lihat File SK'
+                                : ($record->status === StatusPermohonan::SkTerbit ? 'Sedang dibuat…' : '-'))
                             ->url(fn (PermohonanPembimbing $record): ?string => $record->file_sk
                                 ? route('sk.lihat', $record)
                                 : null, true)
@@ -491,7 +493,7 @@ class ViewPermohonanPembimbing extends ViewRecord
                 ->modalHeading('Verifikasi & Terbitkan SK')
                 ->modalDescription(fn (): string => 'Nomor dan tanggal SK akan digenerate otomatis (contoh: '
                     .app(\App\Services\SkPembimbingGenerator::class)->peekNextNomor()
-                    .'). Sistem juga membuat PDF SK serta mengirim notifikasi email ke mahasiswa.')
+                    .'). PDF SK dan email ke mahasiswa diproses setelah halaman selesai, agar penerbitan tidak menunggu SMTP.')
                 ->modalSubmitActionLabel('Ya, Terbitkan SK')
                 ->action(function () use ($user): void {
                     /** @var PermohonanPembimbing $record */
@@ -519,58 +521,13 @@ class ViewPermohonanPembimbing extends ViewRecord
                         return;
                     }
 
-                    $pdfError = null;
+                    FinalisasiSkPembimbingJob::dispatch($record->id)->afterResponse();
 
-                    try {
-                        $path = $generator->generate($record->fresh() ?? $record);
-                        $record->forceFill(['file_sk' => $path])->saveQuietly();
-                    } catch (\Throwable $e) {
-                        report($e);
-                        $pdfError = $e->getMessage();
-                    }
-
-                    $record = $record->fresh() ?? $record;
-                    $emailTerkirim = false;
-                    $emailError = null;
-                    $emailPenerima = null;
-
-                    try {
-                        $emailPenerima = app(SkPembimbingMailService::class)->sendTerbitNotification($record);
-                        $emailTerkirim = true;
-                    } catch (\InvalidArgumentException $e) {
-                        $emailError = $e->getMessage();
-                    } catch (\Throwable $e) {
-                        report($e);
-                        $emailError = $e->getMessage();
-                    }
-
-                    if ($pdfError) {
-                        Notification::make()
-                            ->title('SK terbit, tetapi PDF gagal dibuat')
-                            ->body('Nomor: '.$nomorSk.'. Gunakan Generate Ulang SK. '.$pdfError)
-                            ->warning()
-                            ->persistent()
-                            ->send();
-                    } elseif ($emailTerkirim) {
-                        Notification::make()
-                            ->title('SK berhasil diterbitkan')
-                            ->body('Nomor: '.$nomorSk.' - Email dikirim ke '.$emailPenerima)
-                            ->success()
-                            ->send();
-                    } elseif ($emailError) {
-                        Notification::make()
-                            ->title('SK terbit, tetapi email gagal')
-                            ->body('Nomor: '.$nomorSk.' - '.$emailError)
-                            ->warning()
-                            ->persistent()
-                            ->send();
-                    } else {
-                        Notification::make()
-                            ->title('SK berhasil diterbitkan')
-                            ->body('Nomor: '.$nomorSk.' - Mahasiswa belum mengisi email')
-                            ->success()
-                            ->send();
-                    }
+                    Notification::make()
+                        ->title('SK berhasil diterbitkan')
+                        ->body('Nomor: '.$nomorSk.'. PDF dan email sedang diproses. Refresh halaman jika File SK belum tampil.')
+                        ->success()
+                        ->send();
 
                     $this->redirect(static::getResource()::getUrl('view', ['record' => $record]));
                 }),
@@ -588,26 +545,15 @@ class ViewPermohonanPembimbing extends ViewRecord
                 ->modalDescription(fn (): string => 'Email akan dikirim ke '.$this->getRecord()->mahasiswa?->email)
                 ->action(function (): void {
                     $record = $this->getRecord()->fresh();
+                    $email = $record?->mahasiswa?->email;
 
-                    try {
-                        $emailPenerima = app(SkPembimbingMailService::class)->sendTerbitNotification($record);
+                    FinalisasiSkPembimbingJob::dispatch($record->id, kirimEmail: true, forcePdf: false)->afterResponse();
 
-                        Notification::make()
-                            ->title('Email SK berhasil dikirim ulang')
-                            ->body('Dikirim ke '.$emailPenerima.'. Cek Inbox dan folder Spam/Promosi. Jika kosong, buka Brevo → Transactional → Logs.')
-                            ->success()
-                            ->persistent()
-                            ->send();
-                    } catch (\Throwable $e) {
-                        report($e);
-
-                        Notification::make()
-                            ->title('Gagal mengirim email')
-                            ->body($e->getMessage())
-                            ->danger()
-                            ->persistent()
-                            ->send();
-                    }
+                    Notification::make()
+                        ->title('Email SK sedang dikirim')
+                        ->body('Pengiriman ke '.$email.' diproses di latar belakang. Cek Inbox dan folder Spam/Promosi.')
+                        ->success()
+                        ->send();
                 }),
 
             Actions\Action::make('tolakDekan')

@@ -10,6 +10,7 @@ use App\Models\Mahasiswa;
 use App\Models\PermohonanPembimbing;
 use App\Models\User;
 use App\Filament\Support\HapusPermohonanUi;
+use App\Jobs\FinalisasiSkPembimbingJob;
 use App\Services\HapusPermohonanService;
 use App\Services\JudulSkripsiService;
 use App\Services\SkPembimbingGenerator;
@@ -801,11 +802,12 @@ class PermohonanPembimbingResource extends Resource
     {
         abort_unless(auth()->user()?->can('generateUlangSk', $record), 403);
 
-        app(SkPembimbingGenerator::class)->perbaruiDanGenerateUlang($record, $data);
+        app(SkPembimbingGenerator::class)->perbaruiData($record, $data);
+        FinalisasiSkPembimbingJob::dispatch($record->id, kirimEmail: false, forcePdf: true)->afterResponse();
 
         Notification::make()
-            ->title('SK Pembimbing digenerate ulang')
-            ->body('Data permohonan disimpan. Nomor SK dan tanggal penetapan tidak berubah. PDF SK telah dibuat ulang.')
+            ->title('Data SK disimpan')
+            ->body('PDF sedang dibuat ulang di latar belakang. Refresh halaman jika File SK belum berubah.')
             ->success()
             ->send();
     }

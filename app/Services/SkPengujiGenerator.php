@@ -49,6 +49,25 @@ class SkPengujiGenerator
      */
     public function perbaruiDanGenerateUlang(PermohonanPenguji $permohonan, array $data): string
     {
+        $this->perbaruiData($permohonan, $data);
+
+        $permohonan = $permohonan->fresh(['mahasiswa.judulSkripsiAktif']) ?? $permohonan;
+        $lama = $permohonan->file_sk;
+        $path = $this->generate($permohonan);
+        $permohonan->forceFill(['file_sk' => $path])->saveQuietly();
+
+        if (filled($lama) && $lama !== $path) {
+            Storage::disk('public')->delete($lama);
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function perbaruiData(PermohonanPenguji $permohonan, array $data): void
+    {
         $nomorSk = $permohonan->nomor_sk;
         $tanggalSk = $permohonan->tanggal_sk;
 
@@ -80,17 +99,6 @@ class SkPengujiGenerator
             $permohonan->tanggal_sk = $tanggalSk;
             $permohonan->save();
         });
-
-        $permohonan = $permohonan->fresh(['mahasiswa.judulSkripsiAktif']) ?? $permohonan;
-        $lama = $permohonan->file_sk;
-        $path = $this->generate($permohonan);
-        $permohonan->forceFill(['file_sk' => $path])->saveQuietly();
-
-        if (filled($lama) && $lama !== $path) {
-            Storage::disk('public')->delete($lama);
-        }
-
-        return $path;
     }
 
     public function previewHtml(PermohonanPenguji $permohonan): View
@@ -219,7 +227,7 @@ class SkPengujiGenerator
                 return Builder::create()
                     ->writer(new PngWriter)
                     ->data($data)
-                    ->size(180)
+                    ->size(120)
                     ->margin(2)
                     ->build()
                     ->getDataUri();
@@ -228,7 +236,7 @@ class SkPengujiGenerator
             $builder = new Builder(
                 writer: new PngWriter,
                 data: $data,
-                size: 180,
+                size: 120,
                 margin: 2,
             );
 

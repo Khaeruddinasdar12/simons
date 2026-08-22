@@ -6,6 +6,7 @@ use App\Enums\ProgramStudi;
 use App\Enums\StatusPermohonan;
 use App\Filament\Resources\PermohonanPengujiResource\Pages;
 use App\Filament\Support\HapusPermohonanUi;
+use App\Jobs\FinalisasiSkPengujiJob;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PermohonanPenguji;
@@ -729,11 +730,12 @@ class PermohonanPengujiResource extends Resource
     {
         abort_unless(auth()->user()?->can('generateUlangSk', $record), 403);
 
-        app(SkPengujiGenerator::class)->perbaruiDanGenerateUlang($record, $data);
+        app(SkPengujiGenerator::class)->perbaruiData($record, $data);
+        FinalisasiSkPengujiJob::dispatch($record->id, kirimEmail: false, forcePdf: true)->afterResponse();
 
         Notification::make()
-            ->title('SK Penguji digenerate ulang')
-            ->body('Data permohonan disimpan. Nomor SK dan tanggal penetapan tidak berubah. PDF SK telah dibuat ulang.')
+            ->title('Data SK disimpan')
+            ->body('PDF sedang dibuat ulang di latar belakang. Refresh halaman jika File SK belum berubah.')
             ->success()
             ->send();
     }
