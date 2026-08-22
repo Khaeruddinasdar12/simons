@@ -335,11 +335,15 @@ class PermohonanPengujiResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('previewSk')
-                    ->label('Preview SK')
+                    ->label(fn (PermohonanPenguji $record): string => filled($record->file_sk) ? 'Lihat File SK' : 'Preview SK')
                     ->icon('heroicon-o-eye')
                     ->color('gray')
-                    ->tooltip('Buka preview di browser (tanpa generate PDF di server)')
-                    ->url(fn (PermohonanPenguji $record): string => route('sk.penguji.preview', $record))
+                    ->tooltip(fn (PermohonanPenguji $record): string => filled($record->file_sk)
+                        ? 'Buka File SK terbit di tab baru'
+                        : 'Buka preview di browser (tanpa generate PDF di server)')
+                    ->url(fn (PermohonanPenguji $record): string => filled($record->file_sk)
+                        ? route('sk.penguji.lihat', $record)
+                        : route('sk.penguji.preview', $record))
                     ->openUrlInNewTab()
                     ->visible(fn (PermohonanPenguji $record): bool => auth()->user()?->can('previewSk', $record) ?? false),
                 Tables\Actions\Action::make('generateUlangSk')

@@ -76,9 +76,9 @@ class ViewPermohonanPenguji extends ViewRecord
                         Infolists\Components\TextEntry::make('tanggal_sk')->label('Tanggal SK')->date('d/m/Y')->placeholder('-'),
                         Infolists\Components\TextEntry::make('file_sk')
                             ->label('File SK')
-                            ->formatStateUsing(fn (?string $state): string => $state ? 'Unduh PDF SK' : '-')
+                            ->formatStateUsing(fn (?string $state): string => $state ? 'Lihat File SK' : '-')
                             ->url(fn (PermohonanPenguji $record): ?string => $record->file_sk
-                                ? route('sk.penguji.download', $record)
+                                ? route('sk.penguji.lihat', $record)
                                 : null, true)
                             ->columnSpanFull(),
                     ]),
@@ -205,11 +205,15 @@ class ViewPermohonanPenguji extends ViewRecord
 
         return [
             Actions\Action::make('previewSk')
-                ->label('Preview SK')
+                ->label(fn (): string => filled($this->getRecord()->file_sk) ? 'Lihat File SK' : 'Preview SK')
                 ->icon('heroicon-o-eye')
                 ->color('gray')
-                ->tooltip('Buka preview di browser (tanpa generate PDF di server)')
-                ->url(fn (): string => route('sk.penguji.preview', $this->getRecord()))
+                ->tooltip(fn (): string => filled($this->getRecord()->file_sk)
+                    ? 'Buka File SK terbit di tab baru'
+                    : 'Buka preview di browser (tanpa generate PDF di server)')
+                ->url(fn (): string => filled($this->getRecord()->file_sk)
+                    ? route('sk.penguji.lihat', $this->getRecord())
+                    : route('sk.penguji.preview', $this->getRecord()))
                 ->openUrlInNewTab()
                 ->visible(fn (): bool => $user->can('previewSk', $this->getRecord())),
 

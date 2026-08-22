@@ -48,7 +48,11 @@ Route::middleware([
 
     Route::get('/sk/preview/{permohonan}', [PermohonanPembimbingController::class, 'previewSk'])
         ->name('sk.preview');
+    Route::get('/sk/lihat/{permohonan}', [PermohonanPembimbingController::class, 'lihatSk'])
+        ->name('sk.lihat');
 
     Route::get('/sk-penguji/preview/{permohonanPenguji}', [PermohonanPengujiController::class, 'previewSk'])
         ->name('sk.penguji.preview');
+    Route::get('/sk-penguji/lihat/{permohonanPenguji}', [PermohonanPengujiController::class, 'lihatSk'])
+        ->name('sk.penguji.lihat');
 });

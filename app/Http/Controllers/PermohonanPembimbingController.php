@@ -114,6 +114,24 @@ class PermohonanPembimbingController extends Controller
         );
     }
 
+    public function lihatSk(PermohonanPembimbing $permohonan): StreamedResponse
+    {
+        $this->authorize('previewSk', $permohonan);
+
+        abort_unless(
+            $permohonan->status === StatusPermohonan::SkTerbit && filled($permohonan->file_sk),
+            404
+        );
+
+        abort_unless(Storage::disk('public')->exists($permohonan->file_sk), 404);
+
+        return Storage::disk('public')->response(
+            $permohonan->file_sk,
+            'SK-Pembimbing-'.$permohonan->mahasiswa_nim.'.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
     public function previewSk(PermohonanPembimbing $permohonan): View
     {
         $this->authorize('previewSk', $permohonan);

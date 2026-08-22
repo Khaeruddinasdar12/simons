@@ -304,11 +304,15 @@ class PermohonanPembimbingResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('previewSk')
-                    ->label('Preview SK')
+                    ->label(fn (PermohonanPembimbing $record): string => filled($record->file_sk) ? 'Lihat File SK' : 'Preview SK')
                     ->icon('heroicon-o-eye')
                     ->color('gray')
-                    ->tooltip('Buka preview di browser (tanpa generate PDF di server)')
-                    ->url(fn (PermohonanPembimbing $record): string => route('sk.preview', $record))
+                    ->tooltip(fn (PermohonanPembimbing $record): string => filled($record->file_sk)
+                        ? 'Buka File SK terbit di tab baru'
+                        : 'Buka preview di browser (tanpa generate PDF di server)')
+                    ->url(fn (PermohonanPembimbing $record): string => filled($record->file_sk)
+                        ? route('sk.lihat', $record)
+                        : route('sk.preview', $record))
                     ->openUrlInNewTab()
                     ->visible(fn (PermohonanPembimbing $record): bool => auth()->user()?->can('previewSk', $record) ?? false),
                 Tables\Actions\Action::make('ubahJudul')
