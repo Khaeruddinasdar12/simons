@@ -226,13 +226,10 @@
                 Surat Keputusan Dekan Fakultas Syariah dan Hukum Islam Institut Agama Islam Negeri Bone tentang pembimbing proposal skripsi mahasiswa Program Studi {{ $prodiLengkap }}.
             </td>
         </tr>
-    </table>
-
-    <table class="dict" width="100%" cellpadding="0" cellspacing="0">
         <tr>
-            <td class="dict-key" width="1%" valign="top">KESATU</td>
-            <td class="dict-colon" width="1%" valign="top">:</td>
-            <td class="dict-val" valign="top">
+            <td class="label" width="1%" valign="top">KESATU</td>
+            <td class="colon" width="1%" valign="top">:</td>
+            <td valign="top">
                 Menunjuk Saudara(i):
                 <table class="kv" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
@@ -250,16 +247,16 @@
             </td>
         </tr>
         <tr>
-            <td class="dict-key" width="1%" valign="top">KEDUA</td>
-            <td class="dict-colon" width="1%" valign="top">:</td>
-            <td class="dict-val" valign="top">
+            <td class="label" width="1%" valign="top">KEDUA</td>
+            <td class="colon" width="1%" valign="top">:</td>
+            <td valign="top">
                 Segala biaya akibat diterbitkannya Surat Keputusan ini dibebankan kepada anggaran belanja DIPA Institut Agama Islam Negeri Bone tahun {{ $config['tahun_dipa'] }}.
             </td>
         </tr>
         <tr>
-            <td class="dict-key" width="1%" valign="top">KETIGA</td>
-            <td class="dict-colon" width="1%" valign="top">:</td>
-            <td class="dict-val" valign="top">
+            <td class="label" width="1%" valign="top">KETIGA</td>
+            <td class="colon" width="1%" valign="top">:</td>
+            <td valign="top">
                 Segala sesuatu akan diubah dan dipertimbangkan kembali sebagaimana mestinya, apabila di kemudian hari terdapat kekeliruan dalam surat keputusan ini.
             </td>
         </tr>
