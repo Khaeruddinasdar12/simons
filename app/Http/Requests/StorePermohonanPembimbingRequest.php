@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\ProgramStudi;
 use App\Enums\StatusPermohonan;
+use App\Models\Dosen;
 use App\Models\PermohonanPembimbing;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -55,17 +56,11 @@ class StorePermohonanPembimbingRequest extends FormRequest
             'program_studi' => ['required', Rule::enum(ProgramStudi::class)],
             'judul_skripsi' => ['required', 'string', 'max:500'],
             'semester' => ['required', 'integer', 'min:1', 'max:14'],
-            'pembimbing_1' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::exists('dosens', 'nama')->where('is_active', true),
-            ],
+            'pembimbing_1' => ['required', 'integer', Dosen::aktifIdRule()],
             'pembimbing_2' => [
                 'required',
-                'string',
-                'max:255',
-                Rule::exists('dosens', 'nama')->where('is_active', true),
+                'integer',
+                Dosen::aktifIdRule(),
                 'different:pembimbing_1',
             ],
             'file_usul_pembimbing' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
@@ -114,6 +109,8 @@ class StorePermohonanPembimbingRequest extends FormRequest
             'semester.required' => 'Semester wajib diisi.',
             'pembimbing_1.required' => 'Pembimbing 1 wajib dipilih.',
             'pembimbing_2.required' => 'Pembimbing 2 wajib dipilih.',
+            'pembimbing_1.integer' => 'Pembimbing 1 harus dipilih dari daftar dosen aktif.',
+            'pembimbing_2.integer' => 'Pembimbing 2 harus dipilih dari daftar dosen aktif.',
             'pembimbing_1.exists' => 'Pembimbing 1 harus dipilih dari daftar dosen aktif.',
             'pembimbing_2.exists' => 'Pembimbing 2 harus dipilih dari daftar dosen aktif.',
             'pembimbing_2.different' => 'Pembimbing 1 dan Pembimbing 2 tidak boleh sama.',
@@ -157,11 +154,16 @@ class StorePermohonanPembimbingRequest extends FormRequest
 
     public function permohonanAttributes(): array
     {
-        return $this->safe()->only([
-            'judul_skripsi',
-            'semester',
-            'pembimbing_1',
-            'pembimbing_2',
-        ]);
+        $pembimbing1Id = (int) $this->validated('pembimbing_1');
+        $pembimbing2Id = (int) $this->validated('pembimbing_2');
+
+        return [
+            'judul_skripsi' => $this->validated('judul_skripsi'),
+            'semester' => $this->validated('semester'),
+            'pembimbing_1' => Dosen::namaById($pembimbing1Id),
+            'pembimbing_2' => Dosen::namaById($pembimbing2Id),
+            'pembimbing_1_dosen_id' => $pembimbing1Id,
+            'pembimbing_2_dosen_id' => $pembimbing2Id,
+        ];
     }
 }

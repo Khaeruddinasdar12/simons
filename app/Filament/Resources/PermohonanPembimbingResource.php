@@ -150,7 +150,6 @@ class PermohonanPembimbingResource extends Resource
                             ))
                             ->searchable()
                             ->required()
-                            ->live()
                             ->different('pembimbing_2')
                             ->validationMessages([
                                 'required' => 'Pembimbing 1 wajib dipilih.',
@@ -164,7 +163,6 @@ class PermohonanPembimbingResource extends Resource
                             ))
                             ->searchable()
                             ->required()
-                            ->live()
                             ->different('pembimbing_1')
                             ->validationMessages([
                                 'required' => 'Pembimbing 2 wajib dipilih.',
@@ -755,7 +753,6 @@ class PermohonanPembimbingResource extends Resource
                         ))
                         ->searchable()
                         ->required()
-                        ->live()
                         ->different('pembimbing_2')
                         ->validationMessages([
                             'required' => 'Pembimbing 1 wajib dipilih.',
@@ -769,7 +766,6 @@ class PermohonanPembimbingResource extends Resource
                         ))
                         ->searchable()
                         ->required()
-                        ->live()
                         ->different('pembimbing_1')
                         ->validationMessages([
                             'required' => 'Pembimbing 2 wajib dipilih.',
@@ -799,6 +795,8 @@ class PermohonanPembimbingResource extends Resource
      */
     public static function prosesGenerateUlangSk(PermohonanPembimbing $record, array $data): void
     {
+        abort_unless(auth()->user()?->can('generateUlangSk', $record), 403);
+
         app(SkPembimbingGenerator::class)->perbaruiDanGenerateUlang($record, $data);
 
         Notification::make()

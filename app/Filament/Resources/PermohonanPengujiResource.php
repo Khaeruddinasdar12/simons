@@ -10,8 +10,10 @@ use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PermohonanPenguji;
 use App\Services\HapusPermohonanService;
+use App\Services\SkPengujiGenerator;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -150,7 +152,6 @@ class PermohonanPengujiResource extends Resource
                             ))
                             ->searchable()
                             ->required()
-                            ->live()
                             ->different('penguji_2')
                             ->rules([
                                 fn (?PermohonanPenguji $record) => function (string $attribute, mixed $value, \Closure $fail) use ($record): void {
@@ -175,7 +176,6 @@ class PermohonanPengujiResource extends Resource
                             ))
                             ->searchable()
                             ->required()
-                            ->live()
                             ->different('penguji_1')
                             ->rules([
                                 fn (?PermohonanPenguji $record) => function (string $attribute, mixed $value, \Closure $fail) use ($record): void {
@@ -342,6 +342,20 @@ class PermohonanPengujiResource extends Resource
                     ->url(fn (PermohonanPenguji $record): string => route('sk.penguji.preview', $record))
                     ->openUrlInNewTab()
                     ->visible(fn (PermohonanPenguji $record): bool => auth()->user()?->can('previewSk', $record) ?? false),
+                Tables\Actions\Action::make('generateUlangSk')
+                    ->label('Generate Ulang SK')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('gray')
+                    ->visible(fn (PermohonanPenguji $record): bool => auth()->user()?->can('generateUlangSk', $record) ?? false)
+                    ->fillForm(fn (PermohonanPenguji $record): array => self::generateUlangSkFillForm($record))
+                    ->form(self::generateUlangSkFormSchema())
+                    ->modalHeading('Generate Ulang SK Penguji')
+                    ->modalDescription('Semua isian dapat diubah. Nomor SK dan tanggal penetapan tidak berubah. PDF SK akan dibuat ulang dari data ini.')
+                    ->modalWidth('7xl')
+                    ->modalSubmitActionLabel('Simpan & Generate Ulang SK')
+                    ->action(function (PermohonanPenguji $record, array $data): void {
+                        self::prosesGenerateUlangSk($record, $data);
+                    }),
                 Tables\Actions\EditAction::make()
                     ->visible(fn (PermohonanPenguji $record): bool => auth()->user()?->can('update', $record) ?? false),
                 Tables\Actions\DeleteAction::make()
@@ -557,5 +571,166 @@ class PermohonanPengujiResource extends Resource
             'wadek1Verifier',
             'dekanVerifier',
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function generateUlangSkFillForm(PermohonanPenguji $record): array
+    {
+        $record->loadMissing('mahasiswa');
+        $mahasiswa = $record->mahasiswa;
+
+        return [
+            'nomor_sk' => $record->nomor_sk,
+            'tanggal_sk' => $record->tanggal_sk,
+            'mahasiswa' => [
+                'nim' => $mahasiswa?->nim,
+                'nama_lengkap' => $mahasiswa?->nama_lengkap,
+                'tempat_lahir' => $mahasiswa?->tempat_lahir,
+                'tanggal_lahir' => $mahasiswa?->tanggal_lahir,
+                'alamat_lengkap' => $mahasiswa?->alamat_lengkap,
+                'no_hp' => $mahasiswa?->no_hp,
+                'email' => $mahasiswa?->email,
+                'program_studi' => $mahasiswa?->program_studi?->value,
+            ],
+            'semester' => $record->semester,
+            'judul_skripsi' => $record->judul_skripsi,
+            'penguji_1' => $record->penguji_1,
+            'penguji_2' => $record->penguji_2,
+            'file_usul_penguji' => $record->file_usul_penguji,
+        ];
+    }
+
+    /**
+     * @return array<int, Forms\Components\Component>
+     */
+    public static function generateUlangSkFormSchema(): array
+    {
+        return [
+            Forms\Components\Section::make('Identitas SK')
+                ->description('Nomor SK dan tanggal penetapan tidak diubah.')
+                ->columns(2)
+                ->schema([
+                    Forms\Components\TextInput::make('nomor_sk')
+                        ->label('Nomor SK')
+                        ->disabled()
+                        ->dehydrated(false),
+                    Forms\Components\DatePicker::make('tanggal_sk')
+                        ->label('Tanggal Penetapan')
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->native(false)
+                        ->displayFormat('d/m/Y'),
+                ]),
+            Forms\Components\Section::make('Data Mahasiswa')
+                ->columns(2)
+                ->schema([
+                    Forms\Components\TextInput::make('mahasiswa.nim')
+                        ->label('NIM')
+                        ->required()
+                        ->maxLength(30)
+                        ->rule(function (Get $get, ?PermohonanPenguji $record): Unique {
+                            $nim = $record?->mahasiswa_nim ?? $get('mahasiswa.nim');
+
+                            return (new Unique('mahasiswas', 'nim'))
+                                ->ignore($nim, 'nim');
+                        })
+                        ->validationMessages([
+                            'required' => 'NIM wajib diisi.',
+                        ]),
+                    Forms\Components\TextInput::make('mahasiswa.nama_lengkap')
+                        ->label('Nama Lengkap')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('mahasiswa.tempat_lahir')
+                        ->label('Tempat Lahir')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\DatePicker::make('mahasiswa.tanggal_lahir')
+                        ->label('Tanggal Lahir')
+                        ->required()
+                        ->native(false)
+                        ->displayFormat('d/m/Y'),
+                    Forms\Components\Textarea::make('mahasiswa.alamat_lengkap')
+                        ->label('Alamat Lengkap')
+                        ->required()
+                        ->columnSpanFull()
+                        ->rows(3),
+                    Forms\Components\TextInput::make('mahasiswa.no_hp')
+                        ->label('No. HP')
+                        ->required()
+                        ->maxLength(20),
+                    Forms\Components\TextInput::make('mahasiswa.email')
+                        ->label('Email')
+                        ->email()
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\Select::make('mahasiswa.program_studi')
+                        ->label('Program Studi')
+                        ->options(ProgramStudi::options())
+                        ->required()
+                        ->native(false),
+                    Forms\Components\TextInput::make('semester')
+                        ->label('Semester')
+                        ->numeric()
+                        ->required()
+                        ->minValue(1)
+                        ->maxValue(14),
+                ]),
+            Forms\Components\Section::make('Skripsi & Penguji')
+                ->columns(2)
+                ->schema([
+                    Forms\Components\Textarea::make('judul_skripsi')
+                        ->label('Judul Skripsi')
+                        ->required()
+                        ->columnSpanFull()
+                        ->rows(2),
+                    Forms\Components\Select::make('penguji_1')
+                        ->label('Penguji 1')
+                        ->options(fn (Get $get, ?PermohonanPenguji $record): array => Dosen::optionsForSelect(
+                            $get('penguji_1') ?? $record?->penguji_1,
+                            $get('penguji_2') ?? $record?->penguji_2,
+                        ))
+                        ->searchable()
+                        ->required()
+                        ->different('penguji_2'),
+                    Forms\Components\Select::make('penguji_2')
+                        ->label('Penguji 2')
+                        ->options(fn (Get $get, ?PermohonanPenguji $record): array => Dosen::optionsForSelect(
+                            $get('penguji_1') ?? $record?->penguji_1,
+                            $get('penguji_2') ?? $record?->penguji_2,
+                        ))
+                        ->searchable()
+                        ->required()
+                        ->different('penguji_1'),
+                    Forms\Components\FileUpload::make('file_usul_penguji')
+                        ->label('File Usulan Penguji dari Kaprodi')
+                        ->disk('public')
+                        ->directory('usul-penguji')
+                        ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                        ->downloadable()
+                        ->openable()
+                        ->required()
+                        ->minFiles(1)
+                        ->columnSpanFull(),
+                ]),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function prosesGenerateUlangSk(PermohonanPenguji $record, array $data): void
+    {
+        abort_unless(auth()->user()?->can('generateUlangSk', $record), 403);
+
+        app(SkPengujiGenerator::class)->perbaruiDanGenerateUlang($record, $data);
+
+        Notification::make()
+            ->title('SK Penguji digenerate ulang')
+            ->body('Data permohonan disimpan. Nomor SK dan tanggal penetapan tidak berubah. PDF SK telah dibuat ulang.')
+            ->success()
+            ->send();
     }
 }

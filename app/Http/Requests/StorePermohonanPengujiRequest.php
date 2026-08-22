@@ -3,10 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\StatusPermohonan;
+use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PermohonanPenguji;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StorePermohonanPengujiRequest extends FormRequest
@@ -36,17 +36,11 @@ class StorePermohonanPengujiRequest extends FormRequest
     {
         return [
             'nim' => ['required', 'string', 'max:30'],
-            'penguji_1' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::exists('dosens', 'nama')->where('is_active', true),
-            ],
+            'penguji_1' => ['required', 'integer', Dosen::aktifIdRule()],
             'penguji_2' => [
                 'required',
-                'string',
-                'max:255',
-                Rule::exists('dosens', 'nama')->where('is_active', true),
+                'integer',
+                Dosen::aktifIdRule(),
                 'different:penguji_1',
             ],
             'file_usul_penguji' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
@@ -98,17 +92,17 @@ class StorePermohonanPengujiRequest extends FormRequest
                 $skPembimbing->pembimbing_1,
                 $skPembimbing->pembimbing_2,
             ]);
-            $penguji1 = trim((string) $this->input('penguji_1', ''));
-            $penguji2 = trim((string) $this->input('penguji_2', ''));
+            $penguji1 = Dosen::namaById($this->input('penguji_1'));
+            $penguji2 = Dosen::namaById($this->input('penguji_2'));
 
-            if ($penguji1 !== '' && in_array($penguji1, $pembimbing, true)) {
+            if (filled($penguji1) && in_array($penguji1, $pembimbing, true)) {
                 $validator->errors()->add(
                     'penguji_1',
                     'Penguji 1 tidak boleh sama dengan dosen pembimbing pada SK Pembimbing yang sudah terbit.'
                 );
             }
 
-            if ($penguji2 !== '' && in_array($penguji2, $pembimbing, true)) {
+            if (filled($penguji2) && in_array($penguji2, $pembimbing, true)) {
                 $validator->errors()->add(
                     'penguji_2',
                     'Penguji 2 tidak boleh sama dengan dosen pembimbing pada SK Pembimbing yang sudah terbit.'
@@ -123,6 +117,8 @@ class StorePermohonanPengujiRequest extends FormRequest
             'nim.required' => 'NIM wajib diisi.',
             'penguji_1.required' => 'Penguji 1 wajib dipilih.',
             'penguji_2.required' => 'Penguji 2 wajib dipilih.',
+            'penguji_1.integer' => 'Penguji 1 harus dipilih dari daftar dosen aktif.',
+            'penguji_2.integer' => 'Penguji 2 harus dipilih dari daftar dosen aktif.',
             'penguji_1.exists' => 'Penguji 1 harus dipilih dari daftar dosen aktif.',
             'penguji_2.exists' => 'Penguji 2 harus dipilih dari daftar dosen aktif.',
             'penguji_2.different' => 'Penguji 1 dan Penguji 2 tidak boleh sama.',
@@ -144,9 +140,14 @@ class StorePermohonanPengujiRequest extends FormRequest
 
     public function permohonanAttributes(): array
     {
-        return $this->safe()->only([
-            'penguji_1',
-            'penguji_2',
-        ]);
+        $penguji1Id = (int) $this->validated('penguji_1');
+        $penguji2Id = (int) $this->validated('penguji_2');
+
+        return [
+            'penguji_1' => Dosen::namaById($penguji1Id),
+            'penguji_2' => Dosen::namaById($penguji2Id),
+            'penguji_1_dosen_id' => $penguji1Id,
+            'penguji_2_dosen_id' => $penguji2Id,
+        ];
     }
 }

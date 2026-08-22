@@ -14,6 +14,7 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 
 class ViewPermohonanPenguji extends ViewRecord
@@ -211,6 +212,22 @@ class ViewPermohonanPenguji extends ViewRecord
                 ->url(fn (): string => route('sk.penguji.preview', $this->getRecord()))
                 ->openUrlInNewTab()
                 ->visible(fn (): bool => $user->can('previewSk', $this->getRecord())),
+
+            Actions\Action::make('generateUlangSk')
+                ->label('Generate Ulang SK')
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->visible(fn (): bool => $user->can('generateUlangSk', $this->getRecord()))
+                ->fillForm(fn (): array => PermohonanPengujiResource::generateUlangSkFillForm($this->getRecord()))
+                ->form(PermohonanPengujiResource::generateUlangSkFormSchema())
+                ->modalHeading('Generate Ulang SK Penguji')
+                ->modalDescription('Semua isian dapat diubah. Nomor SK dan tanggal penetapan tidak berubah. PDF SK akan dibuat ulang dari data ini.')
+                ->modalWidth('7xl')
+                ->modalSubmitActionLabel('Simpan & Generate Ulang SK')
+                ->action(function (array $data): void {
+                    PermohonanPengujiResource::prosesGenerateUlangSk($this->getRecord(), $data);
+                    $this->refreshRecord();
+                }),
 
             Actions\EditAction::make()
                 ->visible(fn (): bool => $user->can('update', $this->getRecord())),
@@ -413,17 +430,26 @@ class ViewPermohonanPenguji extends ViewRecord
                     $record = $this->getRecord();
                     $generator = app(\App\Services\SkPengujiGenerator::class);
 
-                    $nomorSk = $generator->nextNomorSk();
-                    $tanggalSk = now()->toDateString();
+                    try {
+                        $nomorSk = $generator->allocateNomorSk(function (string $nomorSk) use ($record, $user): void {
+                            $record->update([
+                                'dekan_status' => 'disetujui',
+                                'dekan_verified_by' => $user->id,
+                                'dekan_verified_at' => now(),
+                                'nomor_sk' => $nomorSk,
+                                'tanggal_sk' => now()->toDateString(),
+                                'status' => StatusPermohonan::SkTerbit,
+                            ]);
+                        });
+                    } catch (UniqueConstraintViolationException $e) {
+                        Notification::make()
+                            ->title('Gagal menerbitkan SK')
+                            ->body('Nomor SK bentrok dengan data yang sudah ada. Silakan coba lagi.')
+                            ->danger()
+                            ->send();
 
-                    $record->update([
-                        'dekan_status' => 'disetujui',
-                        'dekan_verified_by' => $user->id,
-                        'dekan_verified_at' => now(),
-                        'nomor_sk' => $nomorSk,
-                        'tanggal_sk' => $tanggalSk,
-                        'status' => StatusPermohonan::SkTerbit,
-                    ]);
+                        return;
+                    }
 
                     $path = $generator->generate($record->fresh());
 

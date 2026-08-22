@@ -22,7 +22,7 @@ class PermohonanPembimbingController extends Controller
     {
         return view('permohonan.create', [
             'programStudi' => ProgramStudi::options(),
-            'dosens' => Dosen::optionsForSelect(),
+            'dosens' => Dosen::optionsForIdSelect(),
         ]);
     }
 

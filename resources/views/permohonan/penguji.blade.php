@@ -121,8 +121,8 @@
                             <label class="label" for="penguji_1">Penguji 1 <span style="color:#b42318;">*</span></label>
                             <select id="penguji_1" name="penguji_1" class="field js-dosen-select" data-placeholder="— Cari nama sesuai berkas usul —">
                                 <option value="">— Cari nama sesuai berkas usul —</option>
-                                @foreach ($dosens as $nama)
-                                    <option value="{{ $nama }}" @selected(old('penguji_1') === $nama)>{{ $nama }}</option>
+                                @foreach ($dosens as $id => $nama)
+                                    <option value="{{ $id }}" @selected((string) old('penguji_1') === (string) $id)>{{ $nama }}</option>
                                 @endforeach
                             </select>
                             @error('penguji_1') <p class="error">{{ $message }}</p> @enderror
@@ -131,8 +131,8 @@
                             <label class="label" for="penguji_2">Penguji 2 <span style="color:#b42318;">*</span></label>
                             <select id="penguji_2" name="penguji_2" class="field js-dosen-select" data-placeholder="— Cari nama sesuai berkas usul —">
                                 <option value="">— Cari nama sesuai berkas usul —</option>
-                                @foreach ($dosens as $nama)
-                                    <option value="{{ $nama }}" @selected(old('penguji_2') === $nama)>{{ $nama }}</option>
+                                @foreach ($dosens as $id => $nama)
+                                    <option value="{{ $id }}" @selected((string) old('penguji_2') === (string) $id)>{{ $nama }}</option>
                                 @endforeach
                             </select>
                             <p class="hint">Isikan nama penguji sebagaimana tercantum dalam berkas usul Ketua Program Studi. Penguji 1 dan Penguji 2 harus berbeda, dan tidak boleh sama dengan pembimbing pada SK Pembimbing yang sudah terbit.</p>

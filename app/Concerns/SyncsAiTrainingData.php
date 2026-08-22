@@ -42,12 +42,17 @@ trait SyncsAiTrainingData
         foreach ($this->dosenNamaToIdMap() as $namaField => $idField) {
             $nama = trim((string) $this->getAttribute($namaField));
 
-            $this->setAttribute(
-                $idField,
-                $nama === ''
-                    ? null
-                    : Dosen::query()->where('nama', $nama)->value('id')
-            );
+            if ($nama === '') {
+                $this->setAttribute($idField, null);
+
+                continue;
+            }
+
+            $id = Dosen::query()->where('nama', $nama)->value('id');
+
+            if ($id !== null) {
+                $this->setAttribute($idField, $id);
+            }
         }
     }
 }

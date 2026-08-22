@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
 class Dosen extends Model
 {
@@ -25,6 +27,10 @@ class Dosen extends Model
     protected static function booted(): void
     {
         static::saving(function (Dosen $dosen): void {
+            if (is_string($dosen->nama)) {
+                $dosen->nama = trim(preg_replace('/\s+/u', ' ', str_replace("\u{00A0}", ' ', $dosen->nama)) ?? $dosen->nama);
+            }
+
             foreach (['nip', 'kuota_pembimbing', 'kuota_penguji', 'catatan_minat'] as $field) {
                 if ($dosen->{$field} === '') {
                     $dosen->{$field} = null;
@@ -75,11 +81,39 @@ class Dosen extends Model
 
     public function scopeAktif(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', 1);
+    }
+
+    public static function aktifIdRule(): Exists
+    {
+        return Rule::exists((new static)->getTable(), 'id')->where('is_active', 1);
+    }
+
+    public static function namaById(int|string|null $id): ?string
+    {
+        if (! filled($id) || ! is_numeric($id)) {
+            return null;
+        }
+
+        return static::query()->whereKey((int) $id)->value('nama');
     }
 
     /**
-     * Opsi select (nama => nama). Nama lama yang belum ada di master tetap disertakan.
+     * Opsi form publik (id => nama). Nilai yang dikirim adalah id, bukan nama.
+     *
+     * @return array<int, string>
+     */
+    public static function optionsForIdSelect(): array
+    {
+        return static::query()
+            ->aktif()
+            ->orderBy('nama')
+            ->pluck('nama', 'id')
+            ->all();
+    }
+
+    /**
+     * Opsi select Filament (nama => nama). Nama lama yang belum ada di master tetap disertakan.
      *
      * @return array<string, string>
      */

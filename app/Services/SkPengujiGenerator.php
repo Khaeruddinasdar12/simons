@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\Enums\StatusPermohonan;
 use App\Models\PermohonanPenguji;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPdf;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -31,6 +32,58 @@ class SkPengujiGenerator
         return $path;
     }
 
+    /**
+     * Simpan perubahan isian SK lalu generate ulang PDF.
+     * Nomor SK dan tanggal penetapan tidak diubah.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function perbaruiDanGenerateUlang(PermohonanPenguji $permohonan, array $data): string
+    {
+        $nomorSk = $permohonan->nomor_sk;
+        $tanggalSk = $permohonan->tanggal_sk;
+
+        DB::transaction(function () use ($permohonan, $data, $nomorSk, $tanggalSk): void {
+            $mahasiswa = $permohonan->mahasiswa;
+            $mahasiswaData = $data['mahasiswa'] ?? [];
+
+            if ($mahasiswa && is_array($mahasiswaData) && $mahasiswaData !== []) {
+                $nimBaru = trim((string) ($mahasiswaData['nim'] ?? $mahasiswa->nim));
+                $mahasiswa->fill(Arr::except($mahasiswaData, ['nim']));
+
+                if ($nimBaru !== '' && $nimBaru !== $mahasiswa->nim) {
+                    $mahasiswa->nim = $nimBaru;
+                }
+
+                $mahasiswa->save();
+                $permohonan->mahasiswa_nim = $mahasiswa->nim;
+            }
+
+            $permohonan->fill(Arr::only($data, [
+                'semester',
+                'judul_skripsi',
+                'penguji_1',
+                'penguji_2',
+                'file_usul_penguji',
+            ]));
+
+            $permohonan->nomor_sk = $nomorSk;
+            $permohonan->tanggal_sk = $tanggalSk;
+            $permohonan->save();
+        });
+
+        $permohonan = $permohonan->fresh(['mahasiswa.judulSkripsiAktif']) ?? $permohonan;
+        $lama = $permohonan->file_sk;
+        $path = $this->generate($permohonan);
+        $permohonan->forceFill(['file_sk' => $path])->saveQuietly();
+
+        if (filled($lama) && $lama !== $path) {
+            Storage::disk('public')->delete($lama);
+        }
+
+        return $path;
+    }
+
     public function previewHtml(PermohonanPenguji $permohonan): View
     {
         return view('sk.penguji', $this->viewData(
@@ -42,12 +95,11 @@ class SkPengujiGenerator
 
     /**
      * Format: 001/SK-PENGUJI/08/2026
+     * Nomor urut 3 digit per tahun berjalan, dari nomor terbesar yang sudah terpakai.
      */
     public function nextNomorSk(): string
     {
-        return DB::transaction(function (): string {
-            return $this->buildNomor(lock: true);
-        });
+        return DB::transaction(fn (): string => $this->buildNomor(lock: true));
     }
 
     public function peekNextNomor(): string
@@ -55,35 +107,36 @@ class SkPengujiGenerator
         return $this->buildNomor(lock: false);
     }
 
+    /**
+     * Kunci baris nomor SK, alokasikan nomor berikutnya, lalu simpan dalam transaksi yang sama.
+     *
+     * @param  callable(string $nomorSk): void  $persist
+     */
+    public function allocateNomorSk(callable $persist): string
+    {
+        return retry(3, function () use ($persist): string {
+            return DB::transaction(function () use ($persist): string {
+                $nomorSk = $this->buildNomor(lock: true);
+                $persist($nomorSk);
+
+                return $nomorSk;
+            });
+        }, 50, fn (\Throwable $e): bool => $e instanceof UniqueConstraintViolationException);
+    }
+
     protected function buildNomor(bool $lock): string
     {
         $year = now()->format('Y');
-        $month = now()->format('m');
 
         $query = PermohonanPenguji::query()
-            ->where('status', StatusPermohonan::SkTerbit)
-            ->whereYear('tanggal_sk', $year)
             ->whereNotNull('nomor_sk')
-            ->orderByDesc('id');
+            ->where('nomor_sk', 'like', '%/SK-PENGUJI/%/'.$year);
 
         if ($lock) {
             $query->lockForUpdate();
         }
 
-        $last = $query->value('nomor_sk');
-
-        $next = 1;
-        if (is_string($last) && preg_match('/^(\d{3})\/SK-PENGUJI\//', $last, $matches)) {
-            $next = ((int) $matches[1]) + 1;
-        } else {
-            $count = PermohonanPenguji::query()
-                ->where('status', StatusPermohonan::SkTerbit)
-                ->whereYear('tanggal_sk', $year)
-                ->count();
-            $next = $count + 1;
-        }
-
-        return sprintf('%03d/SK-PENGUJI/%s/%s', $next, $month, $year);
+        return SkNomorAllocator::next('SK-PENGUJI', $query->pluck('nomor_sk'));
     }
 
     protected function draftForPreview(PermohonanPenguji $permohonan): PermohonanPenguji

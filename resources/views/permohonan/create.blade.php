@@ -117,8 +117,8 @@
                         <select id="pembimbing_1" name="pembimbing_1" class="field js-dosen-select" required
                                 data-placeholder="— Cari nama sesuai berkas usul —">
                             <option value="">— Cari nama sesuai berkas usul —</option>
-                            @foreach ($dosens as $nama)
-                                <option value="{{ $nama }}" @selected(old('pembimbing_1') === $nama)>{{ $nama }}</option>
+                            @foreach ($dosens as $id => $nama)
+                                <option value="{{ $id }}" @selected((string) old('pembimbing_1') === (string) $id)>{{ $nama }}</option>
                             @endforeach
                         </select>
                         @error('pembimbing_1') <p class="error">{{ $message }}</p> @enderror
@@ -128,8 +128,8 @@
                         <select id="pembimbing_2" name="pembimbing_2" class="field js-dosen-select" required
                                 data-placeholder="— Cari nama sesuai berkas usul —">
                             <option value="">— Cari nama sesuai berkas usul —</option>
-                            @foreach ($dosens as $nama)
-                                <option value="{{ $nama }}" @selected(old('pembimbing_2') === $nama)>{{ $nama }}</option>
+                            @foreach ($dosens as $id => $nama)
+                                <option value="{{ $id }}" @selected((string) old('pembimbing_2') === (string) $id)>{{ $nama }}</option>
                             @endforeach
                         </select>
                         <p class="hint">Isikan nama pembimbing sebagaimana tercantum dalam berkas usul Ketua Program Studi. Pembimbing 1 dan Pembimbing 2 harus berbeda.</p>

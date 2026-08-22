@@ -21,7 +21,7 @@ class PermohonanPengujiController extends Controller
     public function create(): View
     {
         return view('permohonan.penguji', [
-            'dosens' => Dosen::optionsForSelect(),
+            'dosens' => Dosen::optionsForIdSelect(),
         ]);
     }
 

@@ -20,6 +20,21 @@ class EditPermohonanPenguji extends EditRecord
 
         return [
             Actions\ViewAction::make(),
+            Actions\Action::make('generateUlangSk')
+                ->label('Generate Ulang SK')
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->visible(fn (): bool => auth()->user()?->can('generateUlangSk', $record) ?? false)
+                ->fillForm(fn (): array => PermohonanPengujiResource::generateUlangSkFillForm($this->getRecord()))
+                ->form(PermohonanPengujiResource::generateUlangSkFormSchema())
+                ->modalHeading('Generate Ulang SK Penguji')
+                ->modalDescription('Semua isian dapat diubah. Nomor SK dan tanggal penetapan tidak berubah. PDF SK akan dibuat ulang dari data ini.')
+                ->modalWidth('7xl')
+                ->modalSubmitActionLabel('Simpan & Generate Ulang SK')
+                ->action(function (array $data): void {
+                    PermohonanPengujiResource::prosesGenerateUlangSk($this->getRecord(), $data);
+                    $this->redirect($this->getResource()::getUrl('view', ['record' => $this->getRecord()]));
+                }),
             Actions\DeleteAction::make()
                 ->label('Hapus permohonan')
                 ->modalHeading('Hapus permohonan SK Penguji')

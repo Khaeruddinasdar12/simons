@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Enums\StatusPermohonan;
 use App\Models\PermohonanPembimbing;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPdf;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -99,61 +99,48 @@ class SkPembimbingGenerator
 
     /**
      * Format: 001/SK-PEMBIMBING/08/2026
-     * Nomor urut 3 digit per tahun berjalan.
+     * Nomor urut 3 digit per tahun berjalan, dari nomor terbesar yang sudah terpakai.
      */
     public function nextNomorSk(): string
     {
-        return DB::transaction(function (): string {
-            $year = now()->format('Y');
-            $month = now()->format('m');
-
-            $last = PermohonanPembimbing::query()
-                ->where('status', StatusPermohonan::SkTerbit)
-                ->whereYear('tanggal_sk', $year)
-                ->whereNotNull('nomor_sk')
-                ->lockForUpdate()
-                ->orderByDesc('id')
-                ->value('nomor_sk');
-
-            $next = 1;
-            if (is_string($last) && preg_match('/^(\d{3})\/SK-PEMBIMBING\//', $last, $matches)) {
-                $next = ((int) $matches[1]) + 1;
-            } else {
-                $count = PermohonanPembimbing::query()
-                    ->where('status', StatusPermohonan::SkTerbit)
-                    ->whereYear('tanggal_sk', $year)
-                    ->count();
-                $next = $count + 1;
-            }
-
-            return sprintf('%03d/SK-PEMBIMBING/%s/%s', $next, $month, $year);
-        });
+        return DB::transaction(fn (): string => $this->buildNomor(lock: true));
     }
 
     public function peekNextNomor(): string
     {
+        return $this->buildNomor(lock: false);
+    }
+
+    /**
+     * Kunci baris nomor SK, alokasikan nomor berikutnya, lalu simpan dalam transaksi yang sama.
+     *
+     * @param  callable(string $nomorSk): void  $persist
+     */
+    public function allocateNomorSk(callable $persist): string
+    {
+        return retry(3, function () use ($persist): string {
+            return DB::transaction(function () use ($persist): string {
+                $nomorSk = $this->buildNomor(lock: true);
+                $persist($nomorSk);
+
+                return $nomorSk;
+            });
+        }, 50, fn (\Throwable $e): bool => $e instanceof UniqueConstraintViolationException);
+    }
+
+    protected function buildNomor(bool $lock): string
+    {
         $year = now()->format('Y');
-        $month = now()->format('m');
 
-        $last = PermohonanPembimbing::query()
-            ->where('status', StatusPermohonan::SkTerbit)
-            ->whereYear('tanggal_sk', $year)
+        $query = PermohonanPembimbing::query()
             ->whereNotNull('nomor_sk')
-            ->orderByDesc('id')
-            ->value('nomor_sk');
+            ->where('nomor_sk', 'like', '%/SK-PEMBIMBING/%/'.$year);
 
-        $next = 1;
-        if (is_string($last) && preg_match('/^(\d{3})\/SK-PEMBIMBING\//', $last, $matches)) {
-            $next = ((int) $matches[1]) + 1;
-        } else {
-            $count = PermohonanPembimbing::query()
-                ->where('status', StatusPermohonan::SkTerbit)
-                ->whereYear('tanggal_sk', $year)
-                ->count();
-            $next = $count + 1;
+        if ($lock) {
+            $query->lockForUpdate();
         }
 
-        return sprintf('%03d/SK-PEMBIMBING/%s/%s', $next, $month, $year);
+        return SkNomorAllocator::next('SK-PEMBIMBING', $query->pluck('nomor_sk'));
     }
 
     protected function draftForPreview(PermohonanPembimbing $permohonan): PermohonanPembimbing

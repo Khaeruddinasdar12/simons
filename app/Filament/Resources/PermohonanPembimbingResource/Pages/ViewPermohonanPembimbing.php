@@ -17,6 +17,7 @@ use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 
 class ViewPermohonanPembimbing extends ViewRecord
@@ -493,17 +494,26 @@ class ViewPermohonanPembimbing extends ViewRecord
                     $record = $this->getRecord();
                     $generator = app(\App\Services\SkPembimbingGenerator::class);
 
-                    $nomorSk = $generator->nextNomorSk();
-                    $tanggalSk = now()->toDateString();
+                    try {
+                        $nomorSk = $generator->allocateNomorSk(function (string $nomorSk) use ($record, $user): void {
+                            $record->update([
+                                'dekan_status' => 'disetujui',
+                                'dekan_verified_by' => $user->id,
+                                'dekan_verified_at' => now(),
+                                'nomor_sk' => $nomorSk,
+                                'tanggal_sk' => now()->toDateString(),
+                                'status' => StatusPermohonan::SkTerbit,
+                            ]);
+                        });
+                    } catch (UniqueConstraintViolationException $e) {
+                        Notification::make()
+                            ->title('Gagal menerbitkan SK')
+                            ->body('Nomor SK bentrok dengan data yang sudah ada. Silakan coba lagi.')
+                            ->danger()
+                            ->send();
 
-                    $record->update([
-                        'dekan_status' => 'disetujui',
-                        'dekan_verified_by' => $user->id,
-                        'dekan_verified_at' => now(),
-                        'nomor_sk' => $nomorSk,
-                        'tanggal_sk' => $tanggalSk,
-                        'status' => StatusPermohonan::SkTerbit,
-                    ]);
+                        return;
+                    }
 
                     $path = $generator->generate($record->fresh());
 

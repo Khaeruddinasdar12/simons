@@ -90,7 +90,6 @@ class PermohonanPembimbingPolicy
     public function generateUlangSk(User $user, PermohonanPembimbing $record): bool
     {
         return $user->isAkademik()
-            && $record->status === StatusPermohonan::SkTerbit
-            && filled($record->file_sk);
+            && $record->status === StatusPermohonan::SkTerbit;
     }
 }

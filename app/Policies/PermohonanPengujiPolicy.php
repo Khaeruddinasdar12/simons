@@ -76,6 +76,12 @@ class PermohonanPengujiPolicy
         return $user->isDekan() && $record->canDekanVerify();
     }
 
+    public function generateUlangSk(User $user, PermohonanPenguji $record): bool
+    {
+        return $user->isAkademik()
+            && $record->status === StatusPermohonan::SkTerbit;
+    }
+
     public function previewSk(User $user, PermohonanPenguji $record): bool
     {
         return $user->role !== null;
