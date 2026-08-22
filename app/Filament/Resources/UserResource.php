@@ -55,10 +55,13 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('password')
                     ->label('Password')
                     ->password()
-                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? Hash::make($state) : null)
-                    ->dehydrated(fn (?string $state): bool => filled($state))
+                    ->revealable()
+                    ->autocomplete('new-password')
+                    ->maxLength(255)
                     ->required(fn (string $operation): bool => $operation === 'create')
-                    ->maxLength(255),
+                    ->dehydrated(fn (?string $state): bool => filled($state))
+                    ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
+                    ->helperText('Kosongkan jika tidak ingin mengubah password.'),
             ]);
     }
 
@@ -101,7 +104,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageUsers::route('/'),
+            'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

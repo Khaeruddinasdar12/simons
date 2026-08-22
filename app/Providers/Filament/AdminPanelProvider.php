@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 'panels::head.end',
                 fn (): HtmlString => new HtmlString(<<<'HTML'
-<link rel="stylesheet" href="/css/filament-overrides.css?v=4">
+<link rel="stylesheet" href="/css/filament-overrides.css?v=5">
 <style>
 .fi-simple-main{max-width:32rem!important;margin-left:auto!important;margin-right:auto!important;width:100%}
 .fi-layout{display:flex!important;flex-direction:row!important;direction:ltr;min-height:100vh;width:100%}

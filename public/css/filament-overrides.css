@@ -47,3 +47,55 @@
         flex-shrink: 0;
     }
 }
+
+/* Modal: overlay gelap tanpa kartu form (Tailwind production sering tanpa bg-white / max-w-*). */
+[x-cloak] {
+    display: none !important;
+}
+
+.fi-modal-close-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 40 !important;
+    background: rgba(17, 24, 39, 0.5) !important;
+}
+
+.fi-modal-window {
+    position: relative !important;
+    z-index: 50 !important;
+    width: 100% !important;
+    max-width: 32rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    background: #fff !important;
+    color: #111827 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+}
+
+.fi-modal-window.max-w-sm { max-width: 24rem !important; }
+.fi-modal-window.max-w-md { max-width: 28rem !important; }
+.fi-modal-window.max-w-lg { max-width: 32rem !important; }
+.fi-modal-window.max-w-xl { max-width: 36rem !important; }
+.fi-modal-window.max-w-2xl { max-width: 42rem !important; }
+.fi-modal-window.max-w-3xl { max-width: 48rem !important; }
+.fi-modal-window.max-w-4xl { max-width: 56rem !important; }
+.fi-modal-window.max-w-5xl { max-width: 64rem !important; }
+.fi-modal-window.max-w-6xl { max-width: 72rem !important; }
+.fi-modal-window.max-w-7xl { max-width: 80rem !important; }
+
+.fi-modal-header {
+    padding: 1.5rem 1.5rem 0 !important;
+}
+
+.fi-modal-content,
+.fi-modal .fi-form {
+    padding: 1rem 1.5rem !important;
+}
+
+.fi-modal-footer {
+    padding: 1rem 1.5rem 1.5rem !important;
+}
